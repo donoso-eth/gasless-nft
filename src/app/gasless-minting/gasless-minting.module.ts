@@ -2,6 +2,7 @@ import { NgModule,InjectionToken } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { GaslessMintingComponent } from './gasless-minting/gasless-minting.component';
 import { GaslessMintingRoutingModule } from './gasless -minting-routing.module';
+import { ButtonModule } from 'primeng/button';
 
 
 
@@ -13,7 +14,8 @@ import { GaslessMintingRoutingModule } from './gasless -minting-routing.module';
   ],
   imports: [
     CommonModule,
-    GaslessMintingRoutingModule
+    GaslessMintingRoutingModule,
+    ButtonModule
   ],
   exports: [
     GaslessMintingComponent,

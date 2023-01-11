@@ -1,40 +1,66 @@
 <div class="grid justify-content-center flex-column align-items-center">
   <h3>
-      <div style="margin:unset" class="col-12 call-out">
-          <div class="flex align-items-center justify-content-center">
+    <div style="margin:unset" class="col-12 call-out">
+      <div class="flex align-items-center justify-content-center">
 
 
 
-          </div>
       </div>
+    </div>
   </h3>
 
   <div class="col-12">
-      <div class="grid justify-content-center">
+    <div class="grid justify-content-center">
 
 
-          <div style="text-align: center" class="col-12">
-              <div style="border:unset" class="card mb-0">
-                  <p style="font-size: 22px">
-                      Best in Class Ux with
-                      <span style="color: var(--primary-color)">Gelato Relay </span>
-                      experience
-                  </p>
+      <div style="text-align: center" class="col-12">
+        <div style="border:unset" class="card mb-0">
+          <p style="font-size: 22px">
+            Best in Class Ux with
+            <span style="color: var(--primary-color)">Gelato Relay </span>
+            experience
+          </p>
 
 
-                  <h4>Welcome to GasLess DAO</h4>
-                  <p style="margin: unset">with contract <a  href="https://goerli.etherscan.io/address/0xD72a2616ee95c62416C8EADd585fA9EbAbC92B4B#code" target="_blank">Gasless Porposing</a>
-                  and <a  href="https://goerli.etherscan.io/address/0x6948A8F1565a7FcCa4a24F9033fd3E8d0737D636#code" target="_blank">Gasless Voting</a> using the brand new 
-                  <a  href="https://relay.gelato.network/apps/de87da49-11b0-4947-a961-246ea23f250c" target="_blank">1Balance</a>
-                  </p>
-
-                  <div style="margin-top:30px">
-                      <img height="70" src="assets/images/gelato.svg" />
-                  </div>
-                  <!-- <p style="margin: unset">You can </p> -->
-
-              </div>
+          <h4>Welcome to GasLess Minting #{{toKenId}}</h4>
+          <p> sb-raeac14123671@personal.example.com
+            <br>
+            @a!5K1rG<br>
+            4000007240000007<br>
+          </p>
+          <p style="margin: unset">with contract <a
+              href="https://goerli.etherscan.io/address/0xD72a2616ee95c62416C8EADd585fA9EbAbC92B4B#code"
+              target="_blank">Gasless Porposing</a>
+            and <a href="https://goerli.etherscan.io/address/0x6948A8F1565a7FcCa4a24F9033fd3E8d0737D636#code"
+              target="_blank">Gasless Voting</a> using the brand new
+            <a href="https://relay.gelato.network/apps/de87da49-11b0-4947-a961-246ea23f250c"
+              target="_blank">1Balance</a>
+          </p>
+          <div style="margin-top:30px">
+            <img height="70" src="assets/images/gelato.svg" />
           </div>
+          <!-- <p style="margin: unset">You can </p> -->
+          <div style="    width: 500px;
+                  background: white;
+                  padding: 18px;
+                  color: black !important;
+                  border-radius: 5px;
+                  margin: 20px auto;" id="card-element">
+            <!-- A Stripe Element will be inserted here. -->
+          </div>
+          <button pButton pRipple style="margin: 10px auto" type="button" label="Pay"
+            (click)="createRequest()"></button>
+          or
+          <div (click)="goPaypal()" id="paypal-checkout-btn">
+            <img style=" display:block;   height: 40px;
+                object-fit: contain;
+                margin-top: -15px;
+                margin-bottom: 10px;" class="secure-checkout-image" src="assets/images/paypal-button.png" />
+          </div>
+          <!-- Used to display form errors. -->
+          <div id="card-errors" role="alert"></div>
+        </div>
       </div>
     </div>
+  </div>
 </div>

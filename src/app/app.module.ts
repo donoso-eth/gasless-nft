@@ -20,6 +20,8 @@ import { HttpClientModule } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { DropdownModule } from 'primeng/dropdown';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { PaymentService } from './shared/services/payment';
+import { SharedService } from './shared/services/postboot.service';
 
 
 @NgModule({
@@ -33,17 +35,19 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
     BrowserModule,
     AppRoutingModule,
     FormsModule,
+    HttpClientModule,
     ReactiveFormsModule,
     GaslessMintingModule,
-    DappInjectorModule.forRoot({wallet:'local', defaultNetwork:'localhost'}),
+    DappInjectorModule.forRoot({wallet:'wallet', defaultNetwork:'goerli'}),
     StoreModule.forRoot({web3: we3ReducerFunction}),
     DropdownModule,
     ProgressSpinnerModule,
+    ButtonModule,
     ToastModule,
     ButtonModule,
     ClipboardModule,
   ],
-  providers: [MessageService],
+  providers: [MessageService,PaymentService,SharedService ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

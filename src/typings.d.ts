@@ -9,3 +9,6 @@ declare module "*.json" {
 }
 
 declare module '@download/blockies'
+
+declare var Stripe: any;
+declare var elements: any;
