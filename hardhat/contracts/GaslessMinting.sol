@@ -9,20 +9,20 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract GaslessMinting is ERC721URIStorage, ERC2771Context {
      using Counters for Counters.Counter;
-    Counters.Counter private _tokenIds;
+    Counters.Counter public _tokenIds;
 
     constructor()
-        ERC721URIStorage("GLN", "Gass Less NFT")
+        ERC721("GLN", "Gass Less NFT")
         ERC2771Context(address(0xBf175FCC7086b4f9bd59d5EAE8eA67b8f940DE0d))
     {
        
     }
 
-    function awardItem(address player, string memory tokenURI) public returns (uint256) {
+    function relayMint(string memory tokenURI) external  onlyTrustedForwarder returns (uint256) {
         _tokenIds.increment();
 
         uint256 newItemId = _tokenIds.current();
-        _mint(player, newItemId);
+        _mint(_msgSenderERC2771(), newItemId);
         _setTokenURI(newItemId, tokenURI);
 
         return newItemId;
@@ -66,15 +66,9 @@ contract GaslessMinting is ERC721URIStorage, ERC2771Context {
                 sender := shr(96, calldataload(sub(calldatasize(), 20)))
             }
         } else {
-            return super._msgSender();
+            revert('NO_TRUSTED');
         }
     }
 
-    function relayMint() external onlyTrustedForwarder {
-        _tokenId++;
-    }
 
-    function mint() external {
-        _tokenId++;
-    }
 }

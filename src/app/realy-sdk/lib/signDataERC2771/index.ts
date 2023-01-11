@@ -86,10 +86,7 @@ RelayRequestOptions &
 UserAuthSignature &
 ApiKey> => {
   try {
-    const isSupported = await isNetworkSupported(Number(request.chainId));
-    if (!isSupported) {
-      throw new Error(`Chain id [${request.chainId}] is not supported`);
-    }
+  
     const parametersToOverride = await populateOptionalUserParameters<
       SponsoredCallERC2771Request,
       SponsoredCallERC2771RequestOptionalParameters

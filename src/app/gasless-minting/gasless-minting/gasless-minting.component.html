@@ -14,7 +14,7 @@
 
 
       <div style="text-align: center" class="col-12">
-        <div style="border:unset" class="card mb-0">
+        <div style="border:unset; display: flex; flex-direction: column;" class="card mb-0">
           <p style="font-size: 22px">
             Best in Class Ux with
             <span style="color: var(--primary-color)">Gelato Relay </span>
@@ -23,22 +23,33 @@
 
 
           <h4>Welcome to GasLess Minting #{{toKenId}}</h4>
-          <p> sb-raeac14123671@personal.example.com
-            <br>
-            @a!5K1rG<br>
-            4000007240000007<br>
-          </p>
-          <p style="margin: unset">with contract <a
-              href="https://goerli.etherscan.io/address/0xD72a2616ee95c62416C8EADd585fA9EbAbC92B4B#code"
-              target="_blank">Gasless Porposing</a>
-            and <a href="https://goerli.etherscan.io/address/0x6948A8F1565a7FcCa4a24F9033fd3E8d0737D636#code"
-              target="_blank">Gasless Voting</a> using the brand new
+      
+          <p style="margin: unset">with the contract <a
+              href="https://goerli.etherscan.io/address/0xE795F0bF6eA19D7Ce2ee5743Ff02F7cDf532702d#code"
+              target="_blank">Gasless Minting</a>
+            using the brand new
             <a href="https://relay.gelato.network/apps/de87da49-11b0-4947-a961-246ea23f250c"
-              target="_blank">1Balance</a>
+              target="_blank">1Balance</a> <br>you will be awarded with an NFT with one of the 4 gifs below. <br>
+              You don't need Eth.... only 50 us$
           </p>
           <div style="margin-top:30px">
-            <img height="70" src="assets/images/gelato.svg" />
+            <img height="50" src="assets/images/gelato.svg" />
           </div>
+          <div style="display:flex;justify-content: center;margin:auto">
+      
+          <div style="margin-top:30px">
+            <img style="object-fit: cover;height:100px;width:100px;" src="assets/images/1.gif" />
+          </div>
+          <div style="margin-top:30px">
+            <img style="object-fit: cover;height:100px;width:100px;" src="assets/images/2.gif" />
+          </div>
+          <div style="margin-top:30px">
+            <img style="object-fit: cover;height:100px;width:100px;" src="assets/images/3.gif" />
+          </div>
+          <div style="margin-top:30px">
+            <img style="object-fit: cover;height:100px;width:100px;" src="assets/images/4.gif" />
+          </div>
+        </div>
           <!-- <p style="margin: unset">You can </p> -->
           <div style="    width: 500px;
                   background: white;
@@ -49,9 +60,9 @@
             <!-- A Stripe Element will be inserted here. -->
           </div>
           <button pButton pRipple style="margin: 10px auto" type="button" label="Pay"
-            (click)="createRequest()"></button>
+            (click)="goStripe()"></button>
           or
-          <div (click)="goPaypal()" id="paypal-checkout-btn">
+          <div style="margin:30px auto" (click)="goPaypal()" id="paypal-checkout-btn">
             <img style=" display:block;   height: 40px;
                 object-fit: contain;
                 margin-top: -15px;

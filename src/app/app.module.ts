@@ -22,6 +22,7 @@ import { DropdownModule } from 'primeng/dropdown';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { PaymentService } from './shared/services/payment';
 import { SharedService } from './shared/services/postboot.service';
+import { IpfsService } from './shared/services/ipfs.service';
 
 
 @NgModule({
@@ -47,7 +48,7 @@ import { SharedService } from './shared/services/postboot.service';
     ButtonModule,
     ClipboardModule,
   ],
-  providers: [MessageService,PaymentService,SharedService ],
+  providers: [MessageService,PaymentService,SharedService,IpfsService ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

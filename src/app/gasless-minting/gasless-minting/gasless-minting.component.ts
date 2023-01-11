@@ -7,6 +7,7 @@ import {
   angular_web3,
   DappBaseComponent,
   netWorkById,
+  Web3Actions,
 } from 'angular-web3';
 import { Contract, ethers, providers } from 'ethers';
 import { GaslessMinting } from 'src/assets/contracts/interfaces/GaslessMinting';
@@ -19,7 +20,11 @@ import { GelatoRelay } from 'src/app/realy-sdk';
 import { SharedService } from 'src/app/shared/services/postboot.service';
 import { firstValueFrom, pipe } from 'rxjs';
 
+import { getType } from 'mime';
+
 import axios from "axios";
+import { randomString } from 'src/app/shared/helpers/helpers';
+import { IpfsService } from 'src/app/shared/services/ipfs.service';
 
 const relay = new GelatoRelay();
 
@@ -65,36 +70,76 @@ export class GaslessMintingComponent
     dapp: DappInjector,
     public pmt: PaymentService,
     public shared: SharedService,
+    public ipfsService: IpfsService,
     @Inject(DOCUMENT) private readonly document: any
   ) {
     super(dapp, store);
   }
 
   async getTokenId(){
-    this.toKenId = (await this.gaslessMinting._tokenId()).toString()
+    this.toKenId = (await this.gaslessMinting._tokenIds()).toString()
+  }
+
+
+  async getSignedRequest(){
+
+    if (this.blockchain_status !== 'wallet-connected') {
+      alert("please connect your wallet")
+      return
+    }
+
+    this.store.dispatch(Web3Actions.chainBusy({ status: true }));
+    this.store.dispatch(Web3Actions.chainBusyWithMessage({message: {body:`Preparing the transaction`, header:'Waiting..'}}))
+
+
+    let ethereum = (window as any).ethereum;
+
+    let imgRandom =  Math.floor((1 + 4* Math.random()));
+    let imgName = `${imgRandom}.gif`
+    const metadata = {
+      "description": 'Gelato Gasless NFT with Fiat',
+      "external_url": "https://openseacreatures.io/3", 
+      "image": `https://gelato-gasless-nft.web.app/assets/images/${imgName}`, 
+      "name": `#${+this.toKenId+1} Gelato Gasless NFT`,
+      "attributes": [ {value: 'Gasless'}, {value:'Fiat payed'}]
+    }
+
+    const blob = new Blob([JSON.stringify(metadata)], { type: 'application/json' })
+    const file = new File([blob], 'metadata.json')
+      let cid = await this.ipfsService.addFile(file);
+      let url = `https://ipfs.io/ipfs/${cid}/metadata.json`
+      this.store.dispatch(Web3Actions.chainBusyWithMessage({message: {body:`Hash:${cid}`, header:'IPFS Uploaded..'}}))
+
+
+
+
+      const { data } =
+      await this.gaslessMinting.populateTransaction.relayMint(url)
+
+
+      const request = {
+        chainId: 5, // Goerli in this case
+        target: this.gaslessMinting.address, // target contract address
+        data: data!, // encoded transaction datas
+        user: this.dapp.signerAddress!, //user sending the trasnaction
+      };
+      const sponsorApiKey = '1NnnocBNgXnG1VgUnFTHXmUICsvYqfjtKsAq1OCmaxk_';
+      this.store.dispatch(Web3Actions.chainBusyWithMessage({message: {body:`Please sign`, header:'Waitig For Signature..,'}}))
+
+      let signnedRequest = await relay.signDataERC2771(
+        request,
+        new ethers.providers.Web3Provider(ethereum),
+        sponsorApiKey
+      );
+
+      return signnedRequest;
+  
   }
 
   async goPaypal(){
-    let ethereum = (window as any).ethereum;
-
-    const { data } =
-      await this.gaslessMinting.populateTransaction.relayMint()
-
-    const request = {
-      chainId: 5, // Goerli in this case
-      target: this.gaslessMinting.address, // target contract address
-      data: data!, // encoded transaction datas
-      user: this.dapp.signerAddress!, //user sending the trasnaction
-    };
-    const sponsorApiKey = '1NnnocBNgXnG1VgUnFTHXmUICsvYqfjtKsAq1OCmaxk_';
-
-    let signnedRequest = await relay.signDataERC2771(
-      request,
-      new ethers.providers.Web3Provider(ethereum),
-      sponsorApiKey
-    );
-
- 
+  
+    let signnedRequest = await this.getSignedRequest();
+    this.store.dispatch(Web3Actions.chainBusyWithMessage({message: {body:`Payment created, waiting for the relay and nework confirmation`, header:'Waitig For Confirmation.,'}}))
 
     let paypalResult  = await firstValueFrom(
       this.shared.paymentPaypal(signnedRequest)
@@ -103,37 +148,24 @@ export class GaslessMintingComponent
   document.location.href = paypalResult;
   }
 
-  async createRequest() {
-    let ethereum = (window as any).ethereum;
+  async goStripe() {
+ 
 
-    const { data } =
-      await this.gaslessMinting.populateTransaction.relayMint()
-
-    const request = {
-      chainId: 5, // Goerli in this case
-      target: this.gaslessMinting.address, // target contract address
-      data: data!, // encoded transaction datas
-      user: this.dapp.signerAddress!, //user sending the trasnaction
-    };
-    const sponsorApiKey = '1NnnocBNgXnG1VgUnFTHXmUICsvYqfjtKsAq1OCmaxk_';
-
-    let signnedRequest = await relay.signDataERC2771(
-      request,
-      new ethers.providers.Web3Provider(ethereum),
-      sponsorApiKey
-    );
+    let signnedRequest = await this.getSignedRequest();
 
 
-    const RELAY_URL = "https://relay.gelato.digital";
-    // let resultA =  (await axios.post(`${RELAY_URL}/relays/v2/sponsored-call-erc2771`, signnedRequest)).data;
-    // console.log(resultA);
 
-    //   return
-      //"0xeec2c397159b63acced17673f8e48f9c28ea873769eedc99391958cb9d9b9e6a"
+ 
+ 
     let intentResult = await firstValueFrom(
       this.shared.paymentStripeIntent(signnedRequest)
     );
     let clientSecret = intentResult.clientSecret;
+
+    this.store.dispatch(Web3Actions.chainBusyWithMessage({message: {body:`Payment created, waiting for the relay and nework confirmation`, header:'Waitig For Confirmation.,'}}))
+
+
+
     const result = await this.stripe.handleCardPayment(
       clientSecret,
       this.card,
@@ -145,17 +177,13 @@ export class GaslessMintingComponent
     );
 
     if (result.error) {
-      //this.cardState = paymentState.fail;
+     
       console.log(result.error);
-      // Display error.message in your UI.
+
     } else {
     }
   }
 
-  override ngAfterViewInit(): void {
-    super.ngAfterViewInit();
-    this.loadScript();
-  }
 
   private loadScript() {
     // this.stripeLoaded = false;
@@ -174,22 +202,25 @@ export class GaslessMintingComponent
     let signer = this.dapp.signer!;
 
     this.gaslessMinting = this.dapp.defaultContract!.instance;
+    this.gaslessMinting.on('Transfer', () => {
+      this.getTokenId();
+      this.store.dispatch(Web3Actions.chainBusy({ status: false }));
+    });
     this.getTokenId()
 
   }
+
+
+  override ngAfterViewInit(): void {
+    super.ngAfterViewInit();
+  //  this.init();
+  this.loadScript();
+  }
+
   init() {
     this.stripe = Stripe('pk_test_98apj66XNg5rUu7i0Hzq5W1y00wYq5kIbY');
     console.log(this.stripe);
-    // this.paymentRequest = this.stripe.paymentRequest({
-    //   country: 'ES',
-    //   currency: 'eur',
-    //   total: {
-    //     label: 'this.payload.title',
-    //     amount: 50* 100,
-    //   },
-    //   requestPayerName: false,
-    //   requestPayerEmail: true,
-    // });
+
     this.elements = this.stripe.elements();
 
     var style = {

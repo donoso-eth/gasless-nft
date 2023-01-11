@@ -11,20 +11,20 @@ const contract_config = JSON.parse(
 ) as { [key: string]: any };
 
 task('verify-contract', 'verify').setAction(async ({}, hre) => {
-  let deployContract = 'GaslessMinting/';
+  let deployContract = 'gaslessMinting';
   let toDeployContract = contract_config[deployContract];
-  const toVerifyApp = JSON.parse(
-    readFileSync(
-      `${contract_path}/${toDeployContract.jsonName}_metadata.json`,
-      'utf-8'
-    )
-  );
+  // const toVerifyApp = JSON.parse(
+  //   readFileSync(
+  //     `${contract_path}/${toDeployContract.jsonName}_metadata.json`,
+  //     'utf-8'
+  //   )
+  // );
 
 
 
   
   await hre.run('verify:verify', {
-    address: toVerifyApp.address,
+    address: '0xE795F0bF6eA19D7Ce2ee5743Ff02F7cDf532702d',
     constructorArguments: [] ,
   });
 });
