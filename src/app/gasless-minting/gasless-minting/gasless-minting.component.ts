@@ -22,7 +22,7 @@ import { firstValueFrom, pipe } from 'rxjs';
 
 import { getType } from 'mime';
 
-import axios from "axios";
+import axios from 'axios';
 import { randomString } from 'src/app/shared/helpers/helpers';
 import { IpfsService } from 'src/app/shared/services/ipfs.service';
 
@@ -64,7 +64,6 @@ export class GaslessMintingComponent
   gaslessMinting!: GaslessMinting;
   toKenId!: string;
 
-
   constructor(
     store: Store,
     dapp: DappInjector,
@@ -76,95 +75,107 @@ export class GaslessMintingComponent
     super(dapp, store);
   }
 
-  async getTokenId(){
-    this.toKenId = (await this.gaslessMinting._tokenIds()).toString()
+  async getTokenId() {
+    this.toKenId = (await this.gaslessMinting._tokenIds()).toString();
   }
 
-
-  async getSignedRequest(){
-
+  async getSignedRequest() {
     if (this.blockchain_status !== 'wallet-connected') {
-      alert("please connect your wallet")
-      return
+      alert('please connect your wallet');
+      return;
     }
 
     this.store.dispatch(Web3Actions.chainBusy({ status: true }));
-    this.store.dispatch(Web3Actions.chainBusyWithMessage({message: {body:`Preparing the transaction`, header:'Waiting..'}}))
-
+    this.store.dispatch(
+      Web3Actions.chainBusyWithMessage({
+        message: { body: `Preparing the transaction`, header: 'Waiting..' },
+      })
+    );
 
     let ethereum = (window as any).ethereum;
 
-    let imgRandom =  Math.floor((1 + 4* Math.random()));
-    let imgName = `${imgRandom}.gif`
+    let imgRandom = Math.floor(1 + 4 * Math.random());
+    let imgName = `${imgRandom}.gif`;
     const metadata = {
-      "description": 'Gelato Gasless NFT with Fiat',
-      "external_url": "https://openseacreatures.io/3", 
-      "image": `https://gelato-gasless-nft.web.app/assets/images/${imgName}`, 
-      "name": `#${+this.toKenId+1} Gelato Gasless NFT`,
-      "attributes": [ {value: 'Gasless'}, {value:'Fiat payed'}]
-    }
+      description: 'Gelato Gasless NFT with Fiat',
+      external_url: 'https://openseacreatures.io/3',
+      image: `https://gelato-gasless-nft.web.app/assets/images/${imgName}`,
+      name: `#${+this.toKenId + 1} Gelato Gasless NFT`,
+      attributes: [{ value: 'Gasless' }, { value: 'Fiat payed' }],
+    };
 
-    const blob = new Blob([JSON.stringify(metadata)], { type: 'application/json' })
-    const file = new File([blob], 'metadata.json')
-      let cid = await this.ipfsService.addFile(file);
-      let url = `https://ipfs.io/ipfs/${cid}/metadata.json`
-      this.store.dispatch(Web3Actions.chainBusyWithMessage({message: {body:`Hash:${cid}`, header:'IPFS Uploaded..'}}))
+    const blob = new Blob([JSON.stringify(metadata)], {
+      type: 'application/json',
+    });
+    const file = new File([blob], 'metadata.json');
+    let cid = await this.ipfsService.addFile(file);
+    let url = `https://ipfs.io/ipfs/${cid}/metadata.json`;
+    this.store.dispatch(
+      Web3Actions.chainBusyWithMessage({
+        message: { body: `Hash:${cid}`, header: 'IPFS Uploaded..' },
+      })
+    );
 
+    const { data } = await this.gaslessMinting.populateTransaction.relayMint(
+      url
+    );
 
+    const request = {
+      chainId: 5, // Goerli in this case
+      target: this.gaslessMinting.address, // target contract address
+      data: data!, // encoded transaction datas
+      user: this.dapp.signerAddress!, //user sending the trasnaction
+    };
+    const sponsorApiKey = '1NnnocBNgXnG1VgUnFTHXmUICsvYqfjtKsAq1OCmaxk_';
+    this.store.dispatch(
+      Web3Actions.chainBusyWithMessage({
+        message: { body: `Please sign`, header: 'Waitig For Signature..,' },
+      })
+    );
 
+    let signnedRequest = await relay.signDataERC2771(
+      request,
+      new ethers.providers.Web3Provider(ethereum),
+      sponsorApiKey
+    );
 
-      const { data } =
-      await this.gaslessMinting.populateTransaction.relayMint(url)
-
-
-      const request = {
-        chainId: 5, // Goerli in this case
-        target: this.gaslessMinting.address, // target contract address
-        data: data!, // encoded transaction datas
-        user: this.dapp.signerAddress!, //user sending the trasnaction
-      };
-      const sponsorApiKey = '1NnnocBNgXnG1VgUnFTHXmUICsvYqfjtKsAq1OCmaxk_';
-      this.store.dispatch(Web3Actions.chainBusyWithMessage({message: {body:`Please sign`, header:'Waitig For Signature..,'}}))
-
-      let signnedRequest = await relay.signDataERC2771(
-        request,
-        new ethers.providers.Web3Provider(ethereum),
-        sponsorApiKey
-      );
-
-      return signnedRequest;
-  
+    return signnedRequest;
   }
 
-  async goPaypal(){
-  
+  async goPaypal() {
     let signnedRequest = await this.getSignedRequest();
-    this.store.dispatch(Web3Actions.chainBusyWithMessage({message: {body:`Payment created, waiting for the relay and nework confirmation`, header:'Waitig For Confirmation.,'}}))
+    this.store.dispatch(
+      Web3Actions.chainBusyWithMessage({
+        message: {
+          body: `Payment created, waiting for the relay and nework confirmation`,
+          header: 'Waitig For Confirmation.,',
+        },
+      })
+    );
 
-    let paypalResult  = await firstValueFrom(
+    let paypalResult = await firstValueFrom(
       this.shared.paymentPaypal(signnedRequest)
     );
 
-  document.location.href = paypalResult;
+    document.location.href = paypalResult;
   }
 
   async goStripe() {
- 
-
     let signnedRequest = await this.getSignedRequest();
 
-
-
- 
- 
     let intentResult = await firstValueFrom(
       this.shared.paymentStripeIntent(signnedRequest)
     );
     let clientSecret = intentResult.clientSecret;
 
-    this.store.dispatch(Web3Actions.chainBusyWithMessage({message: {body:`Payment created, waiting for the relay and nework confirmation`, header:'Waitig For Confirmation.,'}}))
-
-
+    this.store.dispatch(
+      Web3Actions.chainBusyWithMessage({
+        message: {
+          body: `Payment created, waiting for the relay and nework confirmation`,
+          header: 'Waitig For Confirmation.,',
+        },
+      })
+    );
 
     const result = await this.stripe.handleCardPayment(
       clientSecret,
@@ -177,13 +188,10 @@ export class GaslessMintingComponent
     );
 
     if (result.error) {
-     
       console.log(result.error);
-
     } else {
     }
   }
-
 
   private loadScript() {
     // this.stripeLoaded = false;
@@ -206,15 +214,13 @@ export class GaslessMintingComponent
       this.getTokenId();
       this.store.dispatch(Web3Actions.chainBusy({ status: false }));
     });
-    this.getTokenId()
-
+    this.getTokenId();
   }
-
 
   override ngAfterViewInit(): void {
     super.ngAfterViewInit();
-  //  this.init();
-  this.loadScript();
+
+    this.loadScript();
   }
 
   init() {
@@ -249,7 +255,6 @@ export class GaslessMintingComponent
     // Create an instance of the card Element.
     this.card = this.elements.create('card', { style: style });
     this.card.mount('#card-element');
-    //this.checkBrowser();
   }
 
   connect() {
