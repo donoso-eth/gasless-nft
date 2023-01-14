@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { GaslessMintingComponent } from './gasless-minting/gasless-minting.component';
 import { GaslessMintingRoutingModule } from './gasless -minting-routing.module';
 import { ButtonModule } from 'primeng/button';
+import { ParticlesModule } from '../shared/components/particles/particles.module';
 
 
 
@@ -15,7 +16,8 @@ import { ButtonModule } from 'primeng/button';
   imports: [
     CommonModule,
     GaslessMintingRoutingModule,
-    ButtonModule
+    ButtonModule,
+    ParticlesModule
   ],
   exports: [
     GaslessMintingComponent,

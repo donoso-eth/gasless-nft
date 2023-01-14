@@ -35,43 +35,85 @@
           <div style="margin-top:30px">
             <img height="50" src="assets/images/gelato.svg" />
           </div>
-          <div style="display:flex;justify-content: center;margin:auto">
+          <!--  Gelato Gif's -->
+          <div style="display:flex;justify-content: center;margin:30px auto">
       
-          <div style="margin-top:30px">
+            <div style="margin:5px">
             <img style="object-fit: cover;height:100px;width:100px;" src="assets/images/1.gif" />
           </div>
-          <div style="margin-top:30px">
+          <div style="margin:5px">
             <img style="object-fit: cover;height:100px;width:100px;" src="assets/images/2.gif" />
           </div>
-          <div style="margin-top:30px">
+          <div style="margin:5px">
             <img style="object-fit: cover;height:100px;width:100px;" src="assets/images/3.gif" />
           </div>
-          <div style="margin-top:30px">
+          <div style="margin:5px">
             <img style="object-fit: cover;height:100px;width:100px;" src="assets/images/4.gif" />
           </div>
         </div>
-          <!-- <p style="margin: unset">You can </p> -->
-          <div style="    width: 500px;
-                  background: white;
-                  padding: 18px;
-                  color: black !important;
-                  border-radius: 5px;
-                  margin: 20px auto;" id="card-element">
+    
+          <div style="width: 500px;background: white;padding: 18px;color: black !important; border-radius: 5px; margin: 20px auto;" 
+          id="card-element">
             <!-- A Stripe Element will be inserted here. -->
           </div>
-          <button pButton pRipple style="margin: 10px auto" type="button" label="Pay"
+          <button pButton pRipple style="margin: 10px auto" type="button" label="Pay with Stripe"
             (click)="goStripe()"></button>
-          or
+          <!-- or
           <div style="margin:30px auto" (click)="goPaypal()" id="paypal-checkout-btn">
             <img style=" display:block;   height: 40px;
                 object-fit: contain;
                 margin-top: -15px;
                 margin-bottom: 10px;" class="secure-checkout-image" src="assets/images/paypal-button.png" />
-          </div>
+          </div> -->
           <!-- Used to display form errors. -->
           <div id="card-errors" role="alert"></div>
         </div>
       </div>
     </div>
   </div>
+</div>
+<div
+  *ngIf="show_success ==true"
+  style="
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(91, 87, 87, 0.7);
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    z-index: 1000;
+    align-items: center;
+  top: 0;
+  display: flex;
+  justify-content: center;
+  "
+>
+<app-particles
+style="position: fixed; width: 100%; height: 100%; left: 0; top: 0"
+[shape]="2"
+[moveSpeed]="9"
+[defSize]="20"
+[number]="200"
+[linkingFlag]="false"
+[snowEffect]="true"
+>
+</app-particles>
+<div class="col-12 xl:col-6" style="position:relative;z-index: 1;border-radius:56px; padding:0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%);">
+  <div class="h-full w-full m-0 py-7 px-4" style="border-radius:53px; background: linear-gradient(180deg, var(--surface-50) 38.9%, var(--surface-0));">
+      <div  class="text-center mb-5">
+        <i style="position:absolute;right:30px;top:30px;color:red;cursor:pointer;" (click)="close()" class="pi pi-times"></i>
+          <div class="text-900 text-3xl font-medium mb-3">
+            <h4>Bravo!!</h4></div>
+          <span class="text-600 font-medium"> your NFT #{{toKenId}} has been minted!!</span>
+    
+  
+      <div class="w-full md:w-10 mx-auto flex justify-content-start flex-column align-items-center">
+        <div style="margin:20px">
+          <img *ngIf="randGif!= 0" style="object-fit: cover;height:100px;width:100px;" src="assets/images/{{randGif}}.gif" />
+        </div>
+        <a target="_blank" href="https://testnets.opensea.io/assets/goerli/0xe795f0bf6ea19d7ce2ee5743ff02f7cdf532702d/{{toKenId}}">Click here to see our NFT on OpenSea.io</a>
+      </div>
+    </div>
+  </div>
+</div>
 </div>

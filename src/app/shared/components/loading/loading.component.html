@@ -18,7 +18,7 @@ style="
       <div  *ngIf="isBusyMessage.header != ''" class="text-center mb-5">
        
           <div class="text-900 text-3xl font-medium mb-3">{{isBusyMessage.header}}</div>
-          <span class="text-600 font-medium">{{isBusyMessage.body}}</span>
+          <span class="text-600 font-medium" [innerHTML]="isBusyMessage.body"></span>
       </div>
   
       <div class="w-full md:w-10 mx-auto">

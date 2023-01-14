@@ -25,6 +25,7 @@ import { getType } from 'mime';
 import axios from 'axios';
 import { randomString } from 'src/app/shared/helpers/helpers';
 import { IpfsService } from 'src/app/shared/services/ipfs.service';
+import { threadId } from 'worker_threads';
 
 const relay = new GelatoRelay();
 
@@ -63,6 +64,8 @@ export class GaslessMintingComponent
   stripe: any;
   gaslessMinting!: GaslessMinting;
   toKenId!: string;
+  show_success = false;
+  randGif!: number;
 
   constructor(
     store: Store,
@@ -91,77 +94,95 @@ export class GaslessMintingComponent
         message: { body: `Preparing the transaction`, header: 'Waiting..' },
       })
     );
+    this.randGif = 0;
 
     let ethereum = (window as any).ethereum;
 
+    const currentChainId = await ethereum.request({
+      method: 'eth_chainId',
+    });
+
+    console.log(currentChainId);
+
+    if (currentChainId !== '0x5') {
+      await ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: '0x5' }],
+      });
+      // refresh
+      window.location.reload();
+    }
+
     let imgRandom = Math.floor(1 + 4 * Math.random());
+
+    this.randGif = imgRandom;
+
     let imgName = `${imgRandom}.gif`;
     const metadata = {
       description: 'Gelato Gasless NFT with Fiat',
       external_url: 'https://openseacreatures.io/3',
       image: `https://gelato-gasless-nft.web.app/assets/images/${imgName}`,
       name: `#${+this.toKenId + 1} Gelato Gasless NFT`,
-      attributes: [{ value: 'Gasless' }, { value: 'Fiat payed' }],
+      attributes: [
+        { value: 'Gasless' },
+        { value: 'Fiat Payed' },
+        { value: 'With Stripe' },
+      ],
     };
 
     const blob = new Blob([JSON.stringify(metadata)], {
       type: 'application/json',
     });
     const file = new File([blob], 'metadata.json');
-    let cid = await this.ipfsService.addFile(file);
-    let url = `https://ipfs.io/ipfs/${cid}/metadata.json`;
-    this.store.dispatch(
-      Web3Actions.chainBusyWithMessage({
-        message: { body: `Hash:${cid}`, header: 'IPFS Uploaded..' },
-      })
-    );
-
-    const { data } = await this.gaslessMinting.populateTransaction.relayMint(
-      url
-    );
-
-    const request = {
-      chainId: 5, // Goerli in this case
-      target: this.gaslessMinting.address, // target contract address
-      data: data!, // encoded transaction datas
-      user: this.dapp.signerAddress!, //user sending the trasnaction
-    };
-    const sponsorApiKey = '1NnnocBNgXnG1VgUnFTHXmUICsvYqfjtKsAq1OCmaxk_';
-    this.store.dispatch(
-      Web3Actions.chainBusyWithMessage({
-        message: { body: `Please sign`, header: 'Waitig For Signature..,' },
-      })
-    );
-
-    let signnedRequest = await relay.signDataERC2771(
-      request,
-      new ethers.providers.Web3Provider(ethereum),
-      sponsorApiKey
-    );
-
-    return signnedRequest;
-  }
-
-  async goPaypal() {
-    let signnedRequest = await this.getSignedRequest();
     this.store.dispatch(
       Web3Actions.chainBusyWithMessage({
         message: {
-          body: `Payment created, waiting for the relay and nework confirmation`,
-          header: 'Waitig For Confirmation.,',
+          body: `Please wait till IPFS finish the process`,
+          header: 'Uploading to IPFS..',
         },
       })
     );
+    try {
+      let cid = await this.ipfsService.addFile(file);
+      let url = `https://ipfs.io/ipfs/${cid}/metadata.json`;
 
-    let paypalResult = await firstValueFrom(
-      this.shared.paymentPaypal(signnedRequest)
-    );
+      const { data } = await this.gaslessMinting.populateTransaction.relayMint(
+        url
+      );
 
-    document.location.href = paypalResult;
+      const request = {
+        chainId: 5, // Goerli in this case
+        target: this.gaslessMinting.address, // target contract address
+        data: data!, // encoded transaction datas
+        user: this.dapp.signerAddress!, //user sending the trasnaction
+      };
+      const sponsorApiKey = '1NnnocBNgXnG1VgUnFTHXmUICsvYqfjtKsAq1OCmaxk_';
+      this.store.dispatch(
+        Web3Actions.chainBusyWithMessage({
+          message: { body: `Waitig For Signature.`, header: `Please sign` },
+        })
+      );
+
+      let signnedRequest = await relay.signDataERC2771(
+        request,
+        new ethers.providers.Web3Provider(ethereum),
+        sponsorApiKey
+      );
+      return signnedRequest;
+    } catch (error) {
+      this.store.dispatch(Web3Actions.chainBusy({ status: false }));
+      alert('Something went wrong sorry');
+      console.log(error);
+      return false;
+    
+    }
   }
 
   async goStripe() {
     let signnedRequest = await this.getSignedRequest();
+    if (signnedRequest==false){
+      return
+    }
 
     let intentResult = await firstValueFrom(
       this.shared.paymentStripeIntent(signnedRequest)
@@ -171,8 +192,10 @@ export class GaslessMintingComponent
     this.store.dispatch(
       Web3Actions.chainBusyWithMessage({
         message: {
-          body: `Payment created, waiting for the relay and nework confirmation`,
-          header: 'Waitig For Confirmation.,',
+          header: `Waiting for confirmation`,
+          body: `Payment and minting process created <br> your NFT will be: <br> <br> <div style="margin:20px">
+          <img width=100 height=100 *ngIf="randGif!= 0" style="object-fit: cover;height:100px;width:100px;" src="assets/images/${this.randGif}.gif" />
+        </div>`,
         },
       })
     );
@@ -188,9 +211,30 @@ export class GaslessMintingComponent
     );
 
     if (result.error) {
+      this.store.dispatch(Web3Actions.chainBusy({ status: false }));
+      alert('Something went wrong sorr');
       console.log(result.error);
-    } else {
     }
+  }
+
+  async goPaypal() {
+    let signnedRequest = await this.getSignedRequest();
+    this.store.dispatch(
+      Web3Actions.chainBusyWithMessage({
+        message: {
+          body: `Waiting for Confirmation`,
+          header: `Payment and minting process created <br> your NFT will be:  <div style="margin:20px">
+          <img *ngIf="randGif!= 0" style="object-fit: cover;height:100px;width:100px;" src="assets/images/${this.randGif}.gif" />
+        </div>`,
+        },
+      })
+    );
+
+    let paypalResult = await firstValueFrom(
+      this.shared.paymentPaypal(signnedRequest)
+    );
+
+    document.location.href = paypalResult;
   }
 
   private loadScript() {
@@ -213,6 +257,7 @@ export class GaslessMintingComponent
     this.gaslessMinting.on('Transfer', () => {
       this.getTokenId();
       this.store.dispatch(Web3Actions.chainBusy({ status: false }));
+      this.show_success = true;
     });
     this.getTokenId();
   }
@@ -223,9 +268,13 @@ export class GaslessMintingComponent
     this.loadScript();
   }
 
+  close() {
+    this.show_success = false;
+    this.randGif = 0;
+  }
+
   init() {
     this.stripe = Stripe('pk_test_98apj66XNg5rUu7i0Hzq5W1y00wYq5kIbY');
-    console.log(this.stripe);
 
     this.elements = this.stripe.elements();
 
