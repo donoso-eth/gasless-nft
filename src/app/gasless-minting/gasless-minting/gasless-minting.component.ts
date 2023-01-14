@@ -20,15 +20,15 @@ import { GelatoRelay } from 'src/app/realy-sdk';
 import { SharedService } from 'src/app/shared/services/postboot.service';
 import { firstValueFrom, pipe } from 'rxjs';
 
-import { getType } from 'mime';
+import GaslessMintingMetadata from 'src/assets/contracts/gasless-minting_metadata.json';
 
-import axios from 'axios';
-import { randomString } from 'src/app/shared/helpers/helpers';
 import { IpfsService } from 'src/app/shared/services/ipfs.service';
-import { threadId } from 'worker_threads';
 
+import { Web3Auth, Web3AuthOptions } from "@web3auth/modal";
+import { CHAIN_NAMESPACES, WALLET_ADAPTERS } from '@web3auth/base';
+import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 const relay = new GelatoRelay();
-
+// const openloginAdapter = new OpenloginAdapter(OpenloginAdapterOptions);
 declare var Stripe: any;
 
 @Component({
@@ -66,6 +66,8 @@ export class GaslessMintingComponent
   toKenId!: string;
   show_success = false;
   randGif!: number;
+  web3auth!: Web3Auth;
+  provider!: ethers.providers.Web3Provider;
 
   constructor(
     store: Store,
@@ -76,6 +78,22 @@ export class GaslessMintingComponent
     @Inject(DOCUMENT) private readonly document: any
   ) {
     super(dapp, store);
+    // const web3AuthOptions:Web3AuthOptions = {
+    //   clientId:'BNmf-E8UopCwqiMkOIhqF8h0kjU-tk-zvsaIwsRlNJQVwtZwWUlhc89WUw9XwnzWCyy4fuvPZRiUXxRcrDZHoL4',
+    //   authMode:'DAPP',
+    //   chainConfig: {
+    //     chainNamespace: CHAIN_NAMESPACES.EIP155,
+    //     chainId: "0x5",
+    //     rpcTarget: "https://goerli.infura.io/v3/460f40a260564ac4a4f4b3fffb032dad", // This is the mainnet RPC we have added, please pass on your own endpoint while creating an app
+    //   },
+    //   uiConfig: {
+    //     theme: "dark",
+    //     loginMethodsOrder: ["facebook", "google"],
+    //     appLogo: "https://web3auth.io/images/w3a-L-Favicon-1.svg", // Your App Logo Here
+    //   },
+
+   // }
+   // this.web3auth = new Web3Auth(web3AuthOptions);
   }
 
   async getTokenId() {
@@ -83,9 +101,10 @@ export class GaslessMintingComponent
   }
 
   async getSignedRequest() {
-    if (this.blockchain_status !== 'wallet-connected') {
-      alert('please connect your wallet');
-      return;
+   ;
+    if (this.provider == null) {
+      alert('please sign in');
+      return false;
     }
 
     this.store.dispatch(Web3Actions.chainBusy({ status: true }));
@@ -96,22 +115,22 @@ export class GaslessMintingComponent
     );
     this.randGif = 0;
 
-    let ethereum = (window as any).ethereum;
+    // let ethereum = (window as any).ethereum;
 
-    const currentChainId = await ethereum.request({
-      method: 'eth_chainId',
-    });
+    // const currentChainId = await ethereum.request({
+    //   method: 'eth_chainId',
+    // });
 
-    console.log(currentChainId);
+    // console.log(currentChainId);
 
-    if (currentChainId !== '0x5') {
-      await ethereum.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: '0x5' }],
-      });
-      // refresh
-      window.location.reload();
-    }
+    // if (currentChainId !== '0x5') {
+    //   await ethereum.request({
+    //     method: 'wallet_switchEthereumChain',
+    //     params: [{ chainId: '0x5' }],
+    //   });
+    //   // refresh
+    //   window.location.reload();
+    // }
 
     let imgRandom = Math.floor(1 + 4 * Math.random());
 
@@ -146,15 +165,20 @@ export class GaslessMintingComponent
       let cid = await this.ipfsService.addFile(file);
       let url = `https://ipfs.io/ipfs/${cid}/metadata.json`;
 
+  
+
+
       const { data } = await this.gaslessMinting.populateTransaction.relayMint(
         url
       );
 
+        console.log(data)
+        const address = (await this.provider.listAccounts())[0];
       const request = {
         chainId: 5, // Goerli in this case
         target: this.gaslessMinting.address, // target contract address
         data: data!, // encoded transaction datas
-        user: this.dapp.signerAddress!, //user sending the trasnaction
+        user: address, //user sending the trasnaction
       };
       const sponsorApiKey = '1NnnocBNgXnG1VgUnFTHXmUICsvYqfjtKsAq1OCmaxk_';
       this.store.dispatch(
@@ -165,7 +189,7 @@ export class GaslessMintingComponent
 
       let signnedRequest = await relay.signDataERC2771(
         request,
-        new ethers.providers.Web3Provider(ethereum),
+        this.provider,
         sponsorApiKey
       );
       return signnedRequest;
@@ -253,13 +277,7 @@ export class GaslessMintingComponent
   override async hookContractConnected(): Promise<void> {
     let signer = this.dapp.signer!;
 
-    this.gaslessMinting = this.dapp.defaultContract!.instance;
-    this.gaslessMinting.on('Transfer', () => {
-      this.getTokenId();
-      this.store.dispatch(Web3Actions.chainBusy({ status: false }));
-      this.show_success = true;
-    });
-    this.getTokenId();
+
   }
 
   override ngAfterViewInit(): void {
@@ -304,9 +322,73 @@ export class GaslessMintingComponent
     // Create an instance of the card Element.
     this.card = this.elements.create('card', { style: style });
     this.card.mount('#card-element');
+
+
   }
 
-  connect() {
-    this.dapp.launchWebModal();
+  async connect() {
+    const clientId = "BNmf-E8UopCwqiMkOIhqF8h0kjU-tk-zvsaIwsRlNJQVwtZwWUlhc89WUw9XwnzWCyy4fuvPZRiUXxRcrDZHoL4";
+this.web3auth = new Web3Auth({
+	clientId,
+  web3AuthNetwork:"testnet",
+	chainConfig: { // this is ethereum chain config, change if other chain(Solana, Polygon)
+		chainNamespace: CHAIN_NAMESPACES.EIP155,
+		chainId: "0x5",
+   
+		rpcTarget: "https://goerli.infura.io/v3/460f40a260564ac4a4f4b3fffb032dad",
+	},
+  uiConfig: {
+    theme: "dark",
+    loginMethodsOrder: ["facebook", "google"],
+    appLogo: "https://web3auth.io/images/w3a-L-Favicon-1.svg", // Your App Logo Here
+  },
+});
+await this.web3auth.initModal();
+const web3authProvider = await this.web3auth.connect();
+const id_token = await this.web3auth.authenticateUser();
+console.log((id_token));
+const user = await this.web3auth.getUserInfo();
+console.log(user);
+
+this.provider = new providers.Web3Provider(web3authProvider!);
+
+console.log(await this.provider.getNetwork())
+
+const address = (await this.provider.listAccounts())[0];
+
+this.gaslessMinting = new Contract(
+  GaslessMintingMetadata.address,
+  GaslessMintingMetadata.abi,
+  this.provider
+) as GaslessMinting;
+this.gaslessMinting.on('Transfer', () => {
+  this.getTokenId();
+  this.store.dispatch(Web3Actions.chainBusy({ status: false }));
+  this.show_success = true;
+});
+this.getTokenId();
+
+return
+    await this.web3auth.initModal({
+      modalConfig: {
+        [WALLET_ADAPTERS.OPENLOGIN]: {
+          label: "openlogin",
+          loginMethods: {
+            google: {
+              name: "google login",
+              logoDark: "url to your custom logo which will shown in dark mode",
+            },
+            facebook: {
+              // it will hide the facebook option from the Web3Auth modal.
+              name: "facebook login",
+              showOnModal: false,
+            },
+          },
+          // setting it to false will hide all social login methods from modal.
+          showOnModal: true,
+        },
+      },
+    });
+    //this.dapp.launchWebModal();
   }
 }

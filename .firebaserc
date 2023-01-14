@@ -1,4 +1,16 @@
 {
+  "targets": {
+    "gelato-gasless-nft": {
+      "hosting": {
+        "master": [
+          "gelato-gasless-nft"
+        ],
+        "auth": [
+          "gelato-gasless-nft-web3auth"
+        ]
+      }
+    }
+  }, 
   "projects": {
     "default": "gelato-gasless-nft"
   }
