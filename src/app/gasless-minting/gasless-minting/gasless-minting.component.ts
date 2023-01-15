@@ -24,9 +24,9 @@ import GaslessMintingMetadata from 'src/assets/contracts/gasless-minting_metadat
 
 import { IpfsService } from 'src/app/shared/services/ipfs.service';
 
-import { Web3Auth, Web3AuthOptions } from "@web3auth/modal";
+import { Web3Auth, Web3AuthOptions } from '@web3auth/modal';
 import { CHAIN_NAMESPACES, WALLET_ADAPTERS } from '@web3auth/base';
-import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
+import { OpenloginAdapter } from '@web3auth/openlogin-adapter';
 const relay = new GelatoRelay();
 // const openloginAdapter = new OpenloginAdapter(OpenloginAdapterOptions);
 declare var Stripe: any;
@@ -67,7 +67,7 @@ export class GaslessMintingComponent
   show_success = false;
   randGif!: number;
   web3auth!: Web3Auth;
-  provider!: ethers.providers.Web3Provider;
+  provider: ethers.providers.Web3Provider| null = null;
 
   constructor(
     store: Store,
@@ -92,8 +92,8 @@ export class GaslessMintingComponent
     //     appLogo: "https://web3auth.io/images/w3a-L-Favicon-1.svg", // Your App Logo Here
     //   },
 
-   // }
-   // this.web3auth = new Web3Auth(web3AuthOptions);
+    // }
+    // this.web3auth = new Web3Auth(web3AuthOptions);
   }
 
   async getTokenId() {
@@ -101,7 +101,6 @@ export class GaslessMintingComponent
   }
 
   async getSignedRequest() {
-   ;
     if (this.provider == null) {
       alert('please sign in');
       return false;
@@ -165,15 +164,12 @@ export class GaslessMintingComponent
       let cid = await this.ipfsService.addFile(file);
       let url = `https://ipfs.io/ipfs/${cid}/metadata.json`;
 
-  
-
-
       const { data } = await this.gaslessMinting.populateTransaction.relayMint(
         url
       );
 
-        console.log(data)
-        const address = (await this.provider.listAccounts())[0];
+      console.log(data);
+      const address = (await this.provider.listAccounts())[0];
       const request = {
         chainId: 5, // Goerli in this case
         target: this.gaslessMinting.address, // target contract address
@@ -198,14 +194,13 @@ export class GaslessMintingComponent
       alert('Something went wrong sorry');
       console.log(error);
       return false;
-    
     }
   }
 
   async goStripe() {
     let signnedRequest = await this.getSignedRequest();
-    if (signnedRequest==false){
-      return
+    if (signnedRequest == false) {
+      return;
     }
 
     let intentResult = await firstValueFrom(
@@ -276,14 +271,13 @@ export class GaslessMintingComponent
   }
   override async hookContractConnected(): Promise<void> {
     let signer = this.dapp.signer!;
-
-
   }
 
   override ngAfterViewInit(): void {
     super.ngAfterViewInit();
 
     this.loadScript();
+
   }
 
   close() {
@@ -322,65 +316,73 @@ export class GaslessMintingComponent
     // Create an instance of the card Element.
     this.card = this.elements.create('card', { style: style });
     this.card.mount('#card-element');
+    this.store.dispatch(Web3Actions.chainBusy({ status: false }));
+  }
 
-
+  async signOut(){
+    await this.web3auth.logout();
+    this.provider = null;
   }
 
   async connect() {
-    const clientId = "BNmf-E8UopCwqiMkOIhqF8h0kjU-tk-zvsaIwsRlNJQVwtZwWUlhc89WUw9XwnzWCyy4fuvPZRiUXxRcrDZHoL4";
-this.web3auth = new Web3Auth({
-	clientId,
-  web3AuthNetwork:"testnet",
-	chainConfig: { // this is ethereum chain config, change if other chain(Solana, Polygon)
-		chainNamespace: CHAIN_NAMESPACES.EIP155,
-		chainId: "0x5",
-   
-		rpcTarget: "https://goerli.infura.io/v3/460f40a260564ac4a4f4b3fffb032dad",
-	},
-  uiConfig: {
-    theme: "dark",
-    loginMethodsOrder: ["facebook", "google"],
-    appLogo: "https://web3auth.io/images/w3a-L-Favicon-1.svg", // Your App Logo Here
-  },
-});
-await this.web3auth.initModal();
-const web3authProvider = await this.web3auth.connect();
-const id_token = await this.web3auth.authenticateUser();
-console.log((id_token));
-const user = await this.web3auth.getUserInfo();
-console.log(user);
+    const clientId =
+      'BNmf-E8UopCwqiMkOIhqF8h0kjU-tk-zvsaIwsRlNJQVwtZwWUlhc89WUw9XwnzWCyy4fuvPZRiUXxRcrDZHoL4';
+    this.web3auth = new Web3Auth({
+      clientId,
+      web3AuthNetwork: 'testnet',
+      chainConfig: {
+        // this is ethereum chain config, change if other chain(Solana, Polygon)
+        chainNamespace: CHAIN_NAMESPACES.EIP155,
+        chainId: '0x5',
 
-this.provider = new providers.Web3Provider(web3authProvider!);
+        rpcTarget:
+          'https://goerli.infura.io/v3/460f40a260564ac4a4f4b3fffb032dad',
+      },
+      uiConfig: {
+        theme: 'dark',
+        defaultLanguage:'en',
+        loginMethodsOrder: ['google'],
+        //appLogo: 'https://gelato-gasless-nft-web3auth.web.app/assets/images/gelato.svg', // Your App Logo Here
+      },
+    });
+    await this.web3auth.initModal();
+    const web3authProvider = await this.web3auth.connect();
+    const id_token = await this.web3auth.authenticateUser();
+    console.log(id_token);
+    const user = await this.web3auth.getUserInfo();
+    console.log(user);
 
-console.log(await this.provider.getNetwork())
+    this.provider = new providers.Web3Provider(web3authProvider!);
 
-const address = (await this.provider.listAccounts())[0];
+    console.log(await this.provider.getNetwork());
 
-this.gaslessMinting = new Contract(
-  GaslessMintingMetadata.address,
-  GaslessMintingMetadata.abi,
-  this.provider
-) as GaslessMinting;
-this.gaslessMinting.on('Transfer', () => {
-  this.getTokenId();
-  this.store.dispatch(Web3Actions.chainBusy({ status: false }));
-  this.show_success = true;
-});
-this.getTokenId();
+    const address = (await this.provider.listAccounts())[0];
 
-return
+    this.gaslessMinting = new Contract(
+      GaslessMintingMetadata.address,
+      GaslessMintingMetadata.abi,
+      this.provider
+    ) as GaslessMinting;
+    this.gaslessMinting.on('Transfer', () => {
+      this.getTokenId();
+      this.store.dispatch(Web3Actions.chainBusy({ status: false }));
+      this.show_success = true;
+    });
+    this.getTokenId();
+
+    return;
     await this.web3auth.initModal({
       modalConfig: {
         [WALLET_ADAPTERS.OPENLOGIN]: {
-          label: "openlogin",
+          label: 'openlogin',
           loginMethods: {
             google: {
-              name: "google login",
-              logoDark: "url to your custom logo which will shown in dark mode",
+              name: 'google login',
+              logoDark: 'url to your custom logo which will shown in dark mode',
             },
             facebook: {
               // it will hide the facebook option from the Web3Auth modal.
-              name: "facebook login",
+              name: 'facebook login',
               showOnModal: false,
             },
           },

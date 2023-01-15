@@ -32,8 +32,10 @@
               target="_blank">1Balance</a> <br>you will be awarded with an NFT with one of the 4 gifs below. <br>
               You don't need Eth.... only 50 us$
           </p>
-          <button pButton pRipple style="margin: 10px auto" type="button" label="Sign In"
+          <button *ngIf="provider == null" pButton pRipple style="margin: 10px auto" type="button" label="Sign In"
           (click)="connect()"></button>
+          <button *ngIf="provider !== null" pButton pRipple style="margin: 10px auto" type="button" label="Sign Out"
+          (click)="signOut()"></button>
           <div style="margin-top:30px">
             <img height="50" src="assets/images/gelato.svg" />
           </div>

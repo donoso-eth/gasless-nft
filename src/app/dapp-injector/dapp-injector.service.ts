@@ -52,7 +52,7 @@ export class DappInjector implements OnDestroy {
     private store: Store
   ) {
     ///// ---------  Blockchain Bootstrap
-    this.dappBootstrap();
+  //  this.dappBootstrap();
   }
 
    ///// ---- -----  Launching webmodal when chain is disconnected

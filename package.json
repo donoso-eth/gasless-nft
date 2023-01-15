@@ -18,7 +18,8 @@
     "wire": "cd hardhat && npx hardhat --tsconfig ./tsconfig.hardhat.json run ./helpers/wire.ts",
     "tinker": "cd hardhat && npx hardhat --tsconfig ./tsconfig.hardhat.json run ./scripts/tinker.ts",
     "task": "cd hardhat && npx hardhat --tsconfig ./tsconfig.hardhat.json",
-    "deploy:auth":"ng build && firebase deploy --only hosting:auth"
+    "deploy:auth":"ng build && firebase deploy --only hosting:auth",
+    "deploy:master":"ng build && firebase deploy --only hosting:master"
   },
   "private": true,
   "dependencies": {
