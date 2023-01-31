@@ -18,8 +18,8 @@
     "wire": "cd hardhat && npx hardhat --tsconfig ./tsconfig.hardhat.json run ./helpers/wire.ts",
     "tinker": "cd hardhat && npx hardhat --tsconfig ./tsconfig.hardhat.json run ./scripts/tinker.ts",
     "task": "cd hardhat && npx hardhat --tsconfig ./tsconfig.hardhat.json",
-    "deploy:auth":"ng build && firebase deploy --only hosting:auth",
-    "deploy:master":"ng build && firebase deploy --only hosting:master"
+    "deploy:auth": "ng build && firebase deploy --only hosting:auth",
+    "deploy:master": "ng build && firebase deploy --only hosting:master"
   },
   "private": true,
   "dependencies": {
@@ -33,10 +33,12 @@
     "@angular/platform-browser-dynamic": "^15.0.0",
     "@angular/router": "^15.0.0",
     "@download/blockies": "^1.0.3",
+    "@gelatonetwork/gasless-onboarding": "^0.0.1",
     "@gelatonetwork/relay-context": "^2.1.0",
     "@gelatonetwork/relay-sdk": "^3.0.0",
     "@ngrx/store": "^15.0.0",
     "@stripe/stripe-js": "^1.46.0",
+    "@walletconnect/client": "1.8.0",
     "@web3auth/base": "^4.2.2",
     "@web3auth/core": "^4.2.2",
     "@web3auth/modal": "^4.2.3",

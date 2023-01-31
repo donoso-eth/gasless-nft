@@ -4,6 +4,7 @@ import { GaslessMintingComponent } from './gasless-minting/gasless-minting.compo
 import { GaslessMintingRoutingModule } from './gasless -minting-routing.module';
 import { ButtonModule } from 'primeng/button';
 import { ParticlesModule } from '../shared/components/particles/particles.module';
+import { ClipboardModule } from '@angular/cdk/clipboard';
 
 
 
@@ -17,7 +18,8 @@ import { ParticlesModule } from '../shared/components/particles/particles.module
     CommonModule,
     GaslessMintingRoutingModule,
     ButtonModule,
-    ParticlesModule
+    ParticlesModule,
+    ClipboardModule,
   ],
   exports: [
     GaslessMintingComponent,

@@ -1,5 +1,5 @@
 <div class="grid justify-content-center flex-column align-items-center">
-  <h3>
+  <!-- <h3>
     <div style="margin:unset" class="col-12 call-out">
       <div class="flex align-items-center justify-content-center">
 
@@ -7,7 +7,7 @@
 
       </div>
     </div>
-  </h3>
+  </h3> -->
 
   <div class="col-12">
     <div class="grid justify-content-center">
@@ -15,23 +15,25 @@
 
       <div style="text-align: center" class="col-12">
         <div style="border:unset; display: flex; flex-direction: column;" class="card mb-0">
-          <p style="font-size: 22px">
+          <!-- <p style="font-size: 22px">
             Best in Class Ux with
             <span style="color: var(--primary-color)">Gelato Relay </span>
             experience
-          </p>
+          </p> -->
 
 
-          <h4>Welcome to GasLess Minting #{{toKenId}}</h4>
+          <h4>Gasless NFT minting with Stripe x Gelato</h4>
       
-          <p style="margin: unset">with the contract <a
-              href="https://goerli.etherscan.io/address/0xE795F0bF6eA19D7Ce2ee5743Ff02F7cDf532702d#code"
-              target="_blank">Gasless Minting</a>
-            using the brand new
-            <a href="https://relay.gelato.network/apps/de87da49-11b0-4947-a961-246ea23f250c"
+          <p style="margin: unset">Please visit the  <a
+              href="https://docs.gelato.network/developer-services/relay"
+              target="_blank">Relay Docs</a>
+            for additional information
+  
+            <!-- <a href="https://relay.gelato.network/apps/de87da49-11b0-4947-a961-246ea23f250c"
               target="_blank">1Balance</a> <br>you will be awarded with an NFT with one of the 4 gifs below. <br>
-              You don't need Eth.... only 50 us$
+              You don't need Eth.... only 50 us$ -->
           </p>
+
           <button *ngIf="provider == null" pButton pRipple style="margin: 10px auto" type="button" label="Sign In"
           (click)="connect()"></button>
           <button *ngIf="provider !== null" pButton pRipple style="margin: 10px auto" type="button" label="Sign Out"
@@ -40,7 +42,7 @@
             <img height="50" src="assets/images/gelato.svg" />
           </div>
           <!--  Gelato Gif's -->
-          <div style="display:flex;justify-content: center;margin:30px auto">
+          <div style="display:flex;flex-wrap: wrap; justify-content: center;margin:30px auto">
       
             <div style="margin:5px">
             <img style="object-fit: cover;height:100px;width:100px;" src="assets/images/1.gif" />
@@ -55,8 +57,15 @@
             <img style="object-fit: cover;height:100px;width:100px;" src="assets/images/4.gif" />
           </div>
         </div>
-    
-          <div style="width: 500px;background: white;padding: 18px;color: black !important; border-radius: 5px; margin: 20px auto;" 
+        <div> <span>Test Visa Card: </span>
+          <span style="color: var(--primary-color);font-weight: bold;">4000007240000007</span>
+        <i
+        class="pi pi-copy"
+        style="margin-left:5px;font-size: 1rem; cursor: pointer"
+        [cdkCopyToClipboard]="'4000007240000007'"
+      ></i>
+    </div>
+          <div style="max-width: 100%; width: 500px;background: white;padding: 18px;color: black !important; border-radius: 5px; margin: 20px auto;" 
           id="card-element">
             <!-- A Stripe Element will be inserted here. -->
           </div>
