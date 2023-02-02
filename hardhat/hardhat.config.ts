@@ -31,12 +31,14 @@ if (existsSync('./typechain-types')) {
 
 
 // You need to export an object to set up your config
-// Go to https://hardhat.org/config/ to learn more
+// Go to https://hardhat.org/config/ to learn more  0x1b34B49CfC9f0e484bD6f3C47146205C7564bBBc
 
 const mainnetGwei = 21;
 
 
-const defaultNetwork = 'goerli';
+let defaultNetwork = 'goerli';
+//defaultNetwork = 'localhost';
+
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -63,28 +65,6 @@ const config: HardhatUserConfig = {
       url: 'http://127.0.0.1:8545/',
       chainId: 1337,
     },
-    rinkeby: {
-      url: `https://rinkeby.infura.io/v3/${INFURA_ID}`, // <---- YOUR INFURA ID! (or it won't work)
-      // `https://speedy-nodes-nyc.moralis.io/${MORALIS_ID}/eth/rinkeby`
-      accounts:
-        process.env['DEPLOYER_KEY'] !== undefined
-          ? [process.env['DEPLOYER_KEY']]
-          : [],
-      // accounts: {
-      //   mnemonic: mnemonic(),
-      // },
-    },
-    kovan: {
-      url: `https://kovan.infura.io/v3/${INFURA_ID}`, // <---- YOUR INFURA ID! (or it won't work)
-      // `https://speedy-nodes-nyc.moralis.io/${MORALIS_ID}/eth/kovan`
-      accounts:
-        process.env['DEPLOYER_KEY'] !== undefined
-          ? [process.env['DEPLOYER_KEY']]
-          : [],
-      // accounts: {
-      //   mnemonic: mnemonic(),
-      // },
-    },
     mainnet: {
       url: `https://mainnet.infura.io/v3/${INFURA_ID}`, // <---- YOUR INFURA ID! (or it won't work)
       //`https://speedy-nodes-nyc.moralis.io/${MORALIS_ID}/eth/mainnet`
@@ -95,25 +75,9 @@ const config: HardhatUserConfig = {
           ? [process.env['DEPLOYER_KEY']]
           : [],
     },
-    ropsten: {
-      url: `https://ropsten.infura.io/v3/${INFURA_ID}`, // <---- YOUR INFURA ID! (or it won't work)
-      // `https://speedy-nodes-nyc.moralis.io/${MORALIS_ID}/eth/ropsten`
-          accounts:
-        process.env['DEPLOYER_KEY'] !== undefined
-          ? [process.env['DEPLOYER_KEY']]
-          : [],
-    },
     goerli: {
       url: `https://goerli.infura.io/v3/${INFURA_ID}`, // <---- YOUR INFURA ID! (or it won't work)
       // `https://speedy-nodes-nyc.moralis.io/${MORALIS_ID}/eth/goerli`
-          accounts:
-        process.env['DEPLOYER_KEY'] !== undefined
-          ? [process.env['DEPLOYER_KEY']]
-          : [],
-    },
-    xdai: {
-      url: 'https://rpc.xdaichain.com/',
-      gasPrice: 1000000000,
           accounts:
         process.env['DEPLOYER_KEY'] !== undefined
           ? [process.env['DEPLOYER_KEY']]

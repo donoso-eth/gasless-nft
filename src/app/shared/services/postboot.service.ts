@@ -32,6 +32,19 @@ export class SharedService {
   
   }
   
+  paymentStripeAAIntent(request:any ):Observable<any> {
+    //let url = environment.stripeIntent
+
+    const body = {data:request}
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      })
+    };
+    return this.http.post('https://us-central1-gelato-gasless-nft.cloudfunctions.net/stripeAAIntentFunction', body, httpOptions);
+    
+  }
+
   paymentStripeIntent(request:any ):Observable<any> {
     //let url = environment.stripeIntent
 
@@ -43,7 +56,6 @@ export class SharedService {
     };
     return this.http.post('https://us-central1-gelato-gasless-nft.cloudfunctions.net/stripeIntentFunction', body, httpOptions);
     
-  
   }
 
 }

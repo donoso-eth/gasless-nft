@@ -22,11 +22,11 @@
           </p> -->
 
 
-          <h4>Gasless NFT minting with Stripe x Gelato</h4>
+          <h4>NFT minting with Gelato Gasless Wallet</h4>
       
           <p style="margin: unset">Please visit the  <a
-              href="https://docs.gelato.network/developer-services/relay"
-              target="_blank">Relay Docs</a>
+              href="https://docs.gelato.network/developer-services/gasless-wallet"
+              target="_blank">Gasless Wallet Docs</a>
             for additional information
   
             <!-- <a href="https://relay.gelato.network/apps/de87da49-11b0-4947-a961-246ea23f250c"
@@ -36,8 +36,15 @@
 
           <button *ngIf="provider == null" pButton pRipple style="margin: 10px auto" type="button" label="Sign In"
           (click)="connect()"></button>
+          <div *ngIf="provider!= null">
+            <span style="display:block;padding:10px;" *ngIf="user!= undefined">Logged in with <span style="overflow-wrap: break-word;color:var(--primary-color)">{{user}}</span></span><br>
+            <span style="display:block;padding:10px;" >EOA: <span style="overflow-wrap: break-word;color:var(--primary-color)">{{eoa}}</span></span><br>
+            <span style="display:block;padding:10px;" >Smart Wallet: <span style="overflow-wrap: break-word;color:var(--primary-color)">{{gelatoWalletAddress}}</span></span><br>
+          </div>
+
           <button *ngIf="provider !== null" pButton pRipple style="margin: 10px auto" type="button" label="Sign Out"
           (click)="signOut()"></button>
+      
           <div style="margin-top:30px">
             <img height="50" src="assets/images/gelato.svg" />
           </div>
@@ -57,20 +64,40 @@
             <img style="object-fit: cover;height:100px;width:100px;" src="assets/images/4.gif" />
           </div>
         </div>
-        <div> <span>Test Visa Card: </span>
+
+        <div style="border: 1px solid #f5c3a6;
+        padding: 10px;
+        border-radius: 7px;
+        margin: 20px auto 5px;
+        max-width: 600px;
+        width: 100%;">
+          <h5>Mint without Payment </h5>
+          <button  pButton pRipple style="margin: 10px auto" type="button" label="Mint without Pay"
+          (click)="aaMint()"></button>
+        </div>
+
+        <div style="border: 1px solid #f5c3a6;
+        padding: 10px;
+        border-radius: 7px;
+        margin: 20px auto 5px;
+        max-width: 600px;
+        width: 100%;">
+        <h5>Mint with Payment </h5>
+        <span>Test Visa Card: </span>
           <span style="color: var(--primary-color);font-weight: bold;">4000007240000007</span>
         <i
         class="pi pi-copy"
         style="margin-left:5px;font-size: 1rem; cursor: pointer"
         [cdkCopyToClipboard]="'4000007240000007'"
-      ></i>
-    </div>
+      ></i> 
+
           <div style="max-width: 100%; width: 500px;background: white;padding: 18px;color: black !important; border-radius: 5px; margin: 20px auto;" 
           id="card-element">
             <!-- A Stripe Element will be inserted here. -->
           </div>
-          <button pButton pRipple style="margin: 10px auto" type="button" label="Pay with Stripe"
+          <button  pButton pRipple style="margin: 10px auto" type="button" label="Pay and Mint"
             (click)="goStripe()"></button>
+          
           <!-- or
           <div style="margin:30px auto" (click)="goPaypal()" id="paypal-checkout-btn">
             <img style=" display:block;   height: 40px;
@@ -82,7 +109,7 @@
           <div id="card-errors" role="alert"></div>
         </div>
       </div>
-    </div>
+ 
   </div>
 </div>
 <div
@@ -124,7 +151,7 @@ style="position: fixed; width: 100%; height: 100%; left: 0; top: 0"
         <div style="margin:20px">
           <img *ngIf="randGif!= 0" style="object-fit: cover;height:100px;width:100px;" src="assets/images/{{randGif}}.gif" />
         </div>
-        <a target="_blank" href="https://testnets.opensea.io/assets/goerli/0xe795f0bf6ea19d7ce2ee5743ff02f7cdf532702d/{{toKenId}}">Click here to see our NFT on OpenSea.io</a>
+        <a target="_blank" href="https://testnets.opensea.io/assets/goerli/0xf87389350764548698E35bFEF1682B1328811657/{{toKenId}}">Click here to see our NFT on OpenSea.io</a>
       </div>
     </div>
   </div>

@@ -8,6 +8,13 @@ const routes: Routes = [  { path: '', redirectTo: 'landing', pathMatch: 'full' }
     import('./gasless-minting/gasless-minting.module').then(
       (m) => m.GaslessMintingModule
     ),
+},
+{
+  path: 'login',
+  loadChildren: () =>
+    import('./gasless-minting/gasless-minting.module').then(
+      (m) => m.GaslessMintingModule
+    ),
 },];
 
 @NgModule({

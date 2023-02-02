@@ -24,7 +24,7 @@ task('verify-contract', 'verify').setAction(async ({}, hre) => {
 
   
   await hre.run('verify:verify', {
-    address: '0xE795F0bF6eA19D7Ce2ee5743Ff02F7cDf532702d',
+    address: '0xf87389350764548698E35bFEF1682B1328811657',
     constructorArguments: [] ,
   });
 });

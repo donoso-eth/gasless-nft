@@ -22,6 +22,8 @@ import { firstValueFrom, pipe } from 'rxjs';
 
 import GaslessMintingMetadata from 'src/assets/contracts/gasless-minting_metadata.json';
 
+import { ExternalProvider, Web3Provider } from '@ethersproject/providers';
+
 import { IpfsService } from 'src/app/shared/services/ipfs.service';
 
 import { Web3Auth, Web3AuthOptions } from '@web3auth/modal';
@@ -32,7 +34,12 @@ import {
   GaslessWalletConfig,
   GaslessWalletInterface,
   LoginConfig,
-} from "@gelatonetwork/gasless-onboarding";
+} from '@gelatonetwork/gasless-onboarding';
+
+import { GaslessWallet } from '@gelatonetwork/gasless-wallet';
+
+import { Server } from 'http';
+import { Router, UrlTree } from '@angular/router';
 
 const relay = new GelatoRelay();
 // const openloginAdapter = new OpenloginAdapter(OpenloginAdapterOptions);
@@ -75,7 +82,14 @@ export class GaslessMintingComponent
   randGif!: number;
   web3auth!: Web3Auth;
   provider: ethers.providers.Web3Provider | null = null;
-
+  gaslessOnboarding!: GaslessOnboarding;
+  gelatoSmartWallet!: GaslessWallet;
+  isDeployed!: boolean;
+  web3authProvider: any;
+  gaslessWalletConfig!: { apiKey: string };
+  gelatoWalletAddress!:string;
+  eoa!:string;
+  user!:string;
 
   constructor(
     store: Store,
@@ -83,81 +97,224 @@ export class GaslessMintingComponent
     public pmt: PaymentService,
     public shared: SharedService,
     public ipfsService: IpfsService,
+    public router:Router,
     @Inject(DOCUMENT) private readonly document: any
   ) {
     super(dapp, store);
-
-
   }
 
   async getTokenId() {
     this.toKenId = (await this.gaslessMinting._tokenIds()).toString();
   }
 
-  /// Web3auth Connect
-async connect() {
+  async aaMint() {
+    if (this.provider == null) {
+      alert('please sign in');
+      return;
+    }
+    this.store.dispatch(Web3Actions.chainBusy({ status: true }));
+    this.store.dispatch(
+      Web3Actions.chainBusyWithMessage({
+        message: { body: `Preparing the transaction`, header: 'Waiting..' },
+      })
+    );
+    this.randGif = 0;
 
-  const gaslessWalletConfig: GaslessWalletConfig = { apiKey:'1NnnocBNgXnG1VgUnFTHXmUICsvYqfjtKsAq1OCmaxk_' };
-  const loginConfig: LoginConfig = {
-    chain: {
-      id: 80001,//5,
-      rpcUrl:"https://polygon-mumbai.g.alchemy.com/v2/P2lEQkjFdNjdN0M_mpZKB8r3fAa2M0vT",//"https://goerli.infura.io/v3/460f40a260564ac4a4f4b3fffb032dad",
-    },
-  };
-  const gaslessOnboarding = new GaslessOnboarding(
-    loginConfig,
-    gaslessWalletConfig
-  );
-  await gaslessOnboarding.init();
+    let imgRandom = Math.floor(1 + 4 * Math.random());
 
-  let provide = await gaslessOnboarding.getProvider();
+    this.randGif = imgRandom;
 
-    return
+    let imgName = `${imgRandom}.gif`;
+    const metadata = {
+      description: 'Gelato Gasless NFT',
+      external_url: 'https://openseacreatures.io/3',
+      image: `https://gelato-gasless-nft.web.app/assets/images/${imgName}`,
+      name: `#${+this.toKenId + 1} Gelato Gasless NFT`,
+      attributes: [
+        { value: 'Gasless' },
+        { value: 'Fiat Payed' },
+        { value: 'With Stripe' },
+      ],
+    };
 
-    const clientId =
-      'BNmf-E8UopCwqiMkOIhqF8h0kjU-tk-zvsaIwsRlNJQVwtZwWUlhc89WUw9XwnzWCyy4fuvPZRiUXxRcrDZHoL4';
-    this.web3auth = new Web3Auth({
-      clientId,
-      web3AuthNetwork: 'testnet',
-      chainConfig: {
-        // this is ethereum chain config, change if other chain(Solana, Polygon)
-        chainNamespace: CHAIN_NAMESPACES.EIP155,
-        chainId: '0x5',
-
-        rpcTarget:
-          'https://goerli.infura.io/v3/460f40a260564ac4a4f4b3fffb032dad',
-      },
-      uiConfig: {
-        theme: 'dark',
-        defaultLanguage: 'en',
-        loginMethodsOrder: ['google'],
-        //appLogo: 'https://gelato-gasless-nft-web3auth.web.app/assets/images/gelato.svg', // Your App Logo Here
-      },
+    const blob = new Blob([JSON.stringify(metadata)], {
+      type: 'application/json',
     });
-    await this.web3auth.initModal();
-    const web3authProvider = await this.web3auth.connect();
-    const id_token = await this.web3auth.authenticateUser();
-    console.log(id_token);
-    const user = await this.web3auth.getUserInfo();
-    console.log(user);
+    const file = new File([blob], 'metadata.json');
+    this.store.dispatch(
+      Web3Actions.chainBusyWithMessage({
+        message: {
+          body: `Please wait till IPFS finish the process`,
+          header: 'Uploading to IPFS..',
+        },
+      })
+    );
+    try {
+      let cid = await this.ipfsService.addFile(file);
+      let url = `https://ipfs.io/ipfs/${cid}/metadata.json`;
 
-    this.provider = new providers.Web3Provider(web3authProvider!);
+      const { data } = await this.gaslessMinting.populateTransaction.aaMint(
+        url
+      );
 
-    console.log(await this.provider!.getNetwork());
+    let tx = await this.gelatoSmartWallet.sponsorTransaction(
+      this.gaslessMinting.address,
+      data!
+    );
 
-    const address = (await this.provider!.listAccounts())[0];
+    
+
+
+    } catch(error) {
+      this.store.dispatch(Web3Actions.chainBusy({ status: false }));
+      alert('Something went wrong sorry');
+      console.log(error);
+    
+    }
+  }
+
+  /// Web3auth Connect
+  async connect() {
+    this.gaslessWalletConfig = {
+      apiKey: '1NnnocBNgXnG1VgUnFTHXmUICsvYqfjtKsAq1OCmaxk_',
+    };
+    const loginConfig: LoginConfig = {
+      chain: {
+        id: 5, //80001,//5,
+        rpcUrl: 'https://goerli.infura.io/v3/460f40a260564ac4a4f4b3fffb032dad', //"https://polygon-mumbai.g.alchemy.com/v2/P2lEQkjFdNjdN0M_mpZKB8r3fAa2M0vT",//
+      },
+      ui: {
+        theme: 'dark',
+      },
+      openLogin: {
+        redirectUrl: `${window.location.origin}/login`,
+      },
+    };
+    this.gaslessOnboarding = new GaslessOnboarding(
+      loginConfig,
+      this.gaslessWalletConfig
+    );
+
+    await this.gaslessOnboarding.init();
+
+    this.web3authProvider = await this.gaslessOnboarding.login();
+
+    this.gelatoSmartWallet = await this.gaslessOnboarding.getGaslessWallet()
+
+
+
+    // return
+
+    // const clientId =
+    //   'BNmf-E8UopCwqiMkOIhqF8h0kjU-tk-zvsaIwsRlNJQVwtZwWUlhc89WUw9XwnzWCyy4fuvPZRiUXxRcrDZHoL4';
+    // this.web3auth = new Web3Auth({
+    //   clientId,
+    //   web3AuthNetwork: 'testnet',
+    //   chainConfig: {
+    //     // this is ethereum chain config, change if other chain(Solana, Polygon)
+    //     chainNamespace: CHAIN_NAMESPACES.EIP155,
+    //     chainId: '0x5',
+
+    //     rpcTarget:
+    //       'https://goerli.infura.io/v3/460f40a260564ac4a4f4b3fffb032dad',
+    //   },
+    //   uiConfig: {
+    //     theme: 'dark',
+    //     defaultLanguage: 'en',
+    //     loginMethodsOrder: ['google'],
+    //     //appLogo: 'https://gelato-gasless-nft-web3auth.web.app/assets/images/gelato.svg', // Your App Logo Here
+    //   },
+    // });
+    // await this.web3auth.initModal();
+    // const web3authProvider = await this.web3auth.connect();
+    // const id_token = await this.web3auth.authenticateUser();
+    // console.log(id_token);
+    const user = await this.gaslessOnboarding.getUserInfo();
+
+    this.user = user.email!;
+
+    this.provider = new providers.Web3Provider(this.web3authProvider);
+
+    this.eoa= (await this.provider!.listAccounts())[0];
+
+      this.gelatoWalletAddress = this.gelatoSmartWallet.getAddress()!
 
     this.gaslessMinting = new Contract(
       GaslessMintingMetadata.address,
       GaslessMintingMetadata.abi,
       this.provider!
     ) as GaslessMinting;
-    this.gaslessMinting.on('Transfer', () => {
-      this.getTokenId();
+    this.gaslessMinting.on('Transfer', async () => {
+      await this.getTokenId();
       this.store.dispatch(Web3Actions.chainBusy({ status: false }));
       this.show_success = true;
     });
-    this.getTokenId();
+    await this.getTokenId();
+  }
+
+  async getMetadata() {
+    if (this.provider == null) {
+      alert('please sign in');
+      return false;
+    }
+    this.store.dispatch(Web3Actions.chainBusy({ status: true }));
+    this.store.dispatch(
+      Web3Actions.chainBusyWithMessage({
+        message: { body: `Preparing the transaction`, header: 'Waiting..' },
+      })
+    );
+    this.randGif = 0;
+
+    let imgRandom = Math.floor(1 + 4 * Math.random());
+
+    this.randGif = imgRandom;
+
+    let imgName = `${imgRandom}.gif`;
+    const metadata = {
+      description: 'Gelato Gasless NFT',
+      external_url: 'https://openseacreatures.io/3',
+      image: `https://gelato-gasless-nft.web.app/assets/images/${imgName}`,
+      name: `#${+this.toKenId + 1} Gelato Gasless NFT`,
+      attributes: [
+        { value: 'Gasless' },
+        { value: 'Fiat Payed' },
+        { value: 'With Stripe' },
+      ],
+    };
+
+    const blob = new Blob([JSON.stringify(metadata)], {
+      type: 'application/json',
+    });
+    const file = new File([blob], 'metadata.json');
+    this.store.dispatch(
+      Web3Actions.chainBusyWithMessage({
+        message: {
+          body: `Please wait till IPFS finish the process`,
+          header: 'Uploading to IPFS..',
+        },
+      })
+    );
+    try {
+      let cid = await this.ipfsService.addFile(file);
+      let url = `https://ipfs.io/ipfs/${cid}/metadata.json`;
+
+      const { data } = await this.gaslessMinting.populateTransaction.aaMint(
+        url
+      );
+
+      let object: { web3authProvider:any, gaslessWalletConfig:any, target:any, data:any} = {
+        data,
+        target: this.gaslessMinting.address,
+        gaslessWalletConfig: this.gaslessWalletConfig,
+        web3authProvider: this.web3authProvider,
+      };
+      return object
+    } catch (error) {
+      this.store.dispatch(Web3Actions.chainBusy({ status: false }));
+      alert('Something went wrong sorry');
+      console.log(error);
+      return false;
+    }
   }
 
   /// IPFS and Signing request
@@ -225,22 +382,27 @@ async connect() {
       let cid = await this.ipfsService.addFile(file);
       let url = `https://ipfs.io/ipfs/${cid}/metadata.json`;
 
-      const { data } = await this.gaslessMinting.populateTransaction.relayMint(
+      const { data } = await this.gaslessMinting.populateTransaction.aaMint(
         url
-      );  
+      );
 
-      console.log(data);
+      const tx = await this.gelatoSmartWallet.populateSponsorTransaction(
+        this.gaslessMinting.address,
+        data!
+      );
+
+
       const address = (await this.provider.listAccounts())[0];
       const request = {
         chainId: 5, // Goerli in this case
-        target: this.gaslessMinting.address, // target contract address
-        data: data!, // encoded transaction datas
+        target: this.gelatoWalletAddress, // target contract address
+        data: tx.data!, // encoded transaction datas
         user: address, //user sending the trasnaction
       };
       const sponsorApiKey = '1NnnocBNgXnG1VgUnFTHXmUICsvYqfjtKsAq1OCmaxk_';
       this.store.dispatch(
         Web3Actions.chainBusyWithMessage({
-          message: { body: `Waitig For Signature.`, header: `Please sign` },
+          message: { body: `Waiting For Signature.`, header: `Please sign` },
         })
       );
 
@@ -255,6 +417,52 @@ async connect() {
       alert('Something went wrong sorry');
       console.log(error);
       return false;
+    }
+  }
+
+  /// Stripe with signed request
+  async goStripeAA() {
+    let signnedRequest = await this.getMetadata();
+    if (signnedRequest == false) {
+      return;
+    }
+
+
+    console.log(signnedRequest);
+    return;
+
+    let intentResult = await firstValueFrom(
+      this.shared.paymentStripeAAIntent(signnedRequest)
+    );
+
+      console.log(intentResult)
+    let clientSecret = intentResult.clientSecret;
+
+    this.store.dispatch(
+      Web3Actions.chainBusyWithMessage({
+        message: {
+          header: `Waiting for confirmation`,
+          body: `Payment and minting process created <br> your NFT will be: <br> <br> <div style="margin:20px">
+            <img width=100 height=100 *ngIf="randGif!= 0" style="object-fit: cover;height:100px;width:100px;" src="assets/images/${this.randGif}.gif" />
+          </div>`,
+        },
+      })
+    );
+
+    const result = await this.stripe.handleCardPayment(
+      clientSecret,
+      this.card,
+      {
+        payment_method_data: {
+          billing_details: { name: 'name lastname' },
+        },
+      }
+    );
+
+    if (result.error) {
+      this.store.dispatch(Web3Actions.chainBusy({ status: false }));
+      alert('Something went wrong sorr');
+      console.log(result.error);
     }
   }
 
@@ -298,9 +506,6 @@ async connect() {
     }
   }
 
-
-
-
   private loadScript() {
     // this.stripeLoaded = false;
     const script = this.document.createElement('script');
@@ -318,8 +523,22 @@ async connect() {
     let signer = this.dapp.signer!;
   }
 
+ async reconnect() {
+  this.store.dispatch(Web3Actions.chainBusy({ status: true }));
+  await this.connect();
+  this.store.dispatch(Web3Actions.chainBusy({ status: false }));
+
+ }
+
   override ngAfterViewInit(): void {
     super.ngAfterViewInit();
+
+     let url = window.location.origin;
+
+    if (this.router.url.indexOf('/login')!=-1){
+      console.log('connecting...')
+      this.reconnect();
+          }
 
     this.loadScript();
   }

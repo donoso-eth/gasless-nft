@@ -11,12 +11,25 @@ contract GaslessMinting is ERC721URIStorage, ERC2771Context {
      using Counters for Counters.Counter;
     Counters.Counter public _tokenIds;
 
+    address public senderWallet;
+
     constructor()
         ERC721("GLN", "Gass Less NFT")
         ERC2771Context(address(0xBf175FCC7086b4f9bd59d5EAE8eA67b8f940DE0d))
     {
        
     }
+
+    function aaMint(string memory tokenURI )external returns (uint256) {
+        _tokenIds.increment();
+        senderWallet = msg.sender;
+        uint256 newItemId = _tokenIds.current();
+        _mint(msg.sender, newItemId);
+        _setTokenURI(newItemId, tokenURI);
+
+        return newItemId;
+    }
+
 
     function relayMint(string memory tokenURI) external  onlyTrustedForwarder returns (uint256) {
         _tokenIds.increment();

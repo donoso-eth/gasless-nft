@@ -20,6 +20,7 @@ import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
 export interface GaslessMintingInterface extends utils.Interface {
   functions: {
     "_tokenIds()": FunctionFragment;
+    "aaMint(string)": FunctionFragment;
     "approve(address,uint256)": FunctionFragment;
     "balanceOf(address)": FunctionFragment;
     "getApproved(uint256)": FunctionFragment;
@@ -29,6 +30,7 @@ export interface GaslessMintingInterface extends utils.Interface {
     "ownerOf(uint256)": FunctionFragment;
     "relayMint(string)": FunctionFragment;
     "safeTransferFrom(address,address,uint256)": FunctionFragment;
+    "senderWallet()": FunctionFragment;
     "setApprovalForAll(address,bool)": FunctionFragment;
     "supportsInterface(bytes4)": FunctionFragment;
     "symbol()": FunctionFragment;
@@ -37,6 +39,7 @@ export interface GaslessMintingInterface extends utils.Interface {
   };
 
   encodeFunctionData(functionFragment: "_tokenIds", values?: undefined): string;
+  encodeFunctionData(functionFragment: "aaMint", values: [string]): string;
   encodeFunctionData(
     functionFragment: "approve",
     values: [string, BigNumberish]
@@ -65,6 +68,10 @@ export interface GaslessMintingInterface extends utils.Interface {
     values: [string, string, BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "senderWallet",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "setApprovalForAll",
     values: [string, boolean]
   ): string;
@@ -83,6 +90,7 @@ export interface GaslessMintingInterface extends utils.Interface {
   ): string;
 
   decodeFunctionResult(functionFragment: "_tokenIds", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "aaMint", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
   decodeFunctionResult(
@@ -102,6 +110,10 @@ export interface GaslessMintingInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "relayMint", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "safeTransferFrom",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "senderWallet",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -182,6 +194,11 @@ export interface GaslessMinting extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber] & { _value: BigNumber }>;
 
+    aaMint(
+      tokenURI: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     approve(
       to: string,
       tokenId: BigNumberish,
@@ -233,6 +250,8 @@ export interface GaslessMinting extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    senderWallet(overrides?: CallOverrides): Promise<[string]>;
+
     setApprovalForAll(
       operator: string,
       approved: boolean,
@@ -260,6 +279,11 @@ export interface GaslessMinting extends BaseContract {
   };
 
   _tokenIds(overrides?: CallOverrides): Promise<BigNumber>;
+
+  aaMint(
+    tokenURI: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   approve(
     to: string,
@@ -309,6 +333,8 @@ export interface GaslessMinting extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  senderWallet(overrides?: CallOverrides): Promise<string>;
+
   setApprovalForAll(
     operator: string,
     approved: boolean,
@@ -333,6 +359,8 @@ export interface GaslessMinting extends BaseContract {
 
   callStatic: {
     _tokenIds(overrides?: CallOverrides): Promise<BigNumber>;
+
+    aaMint(tokenURI: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     approve(
       to: string,
@@ -378,6 +406,8 @@ export interface GaslessMinting extends BaseContract {
       data: BytesLike,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    senderWallet(overrides?: CallOverrides): Promise<string>;
 
     setApprovalForAll(
       operator: string,
@@ -440,6 +470,11 @@ export interface GaslessMinting extends BaseContract {
   estimateGas: {
     _tokenIds(overrides?: CallOverrides): Promise<BigNumber>;
 
+    aaMint(
+      tokenURI: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     approve(
       to: string,
       tokenId: BigNumberish,
@@ -491,6 +526,8 @@ export interface GaslessMinting extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    senderWallet(overrides?: CallOverrides): Promise<BigNumber>;
+
     setApprovalForAll(
       operator: string,
       approved: boolean,
@@ -519,6 +556,11 @@ export interface GaslessMinting extends BaseContract {
 
   populateTransaction: {
     _tokenIds(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    aaMint(
+      tokenURI: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
 
     approve(
       to: string,
@@ -573,6 +615,8 @@ export interface GaslessMinting extends BaseContract {
       data: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
+
+    senderWallet(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     setApprovalForAll(
       operator: string,
