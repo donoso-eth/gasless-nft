@@ -201,34 +201,6 @@ export class GaslessMintingComponent
 
     this.gelatoSmartWallet = await this.gaslessOnboarding.getGaslessWallet()
 
-
-
-    // return
-
-    // const clientId =
-    //   'BNmf-E8UopCwqiMkOIhqF8h0kjU-tk-zvsaIwsRlNJQVwtZwWUlhc89WUw9XwnzWCyy4fuvPZRiUXxRcrDZHoL4';
-    // this.web3auth = new Web3Auth({
-    //   clientId,
-    //   web3AuthNetwork: 'testnet',
-    //   chainConfig: {
-    //     // this is ethereum chain config, change if other chain(Solana, Polygon)
-    //     chainNamespace: CHAIN_NAMESPACES.EIP155,
-    //     chainId: '0x5',
-
-    //     rpcTarget:
-    //       'https://goerli.infura.io/v3/460f40a260564ac4a4f4b3fffb032dad',
-    //   },
-    //   uiConfig: {
-    //     theme: 'dark',
-    //     defaultLanguage: 'en',
-    //     loginMethodsOrder: ['google'],
-    //     //appLogo: 'https://gelato-gasless-nft-web3auth.web.app/assets/images/gelato.svg', // Your App Logo Here
-    //   },
-    // });
-    // await this.web3auth.initModal();
-    // const web3authProvider = await this.web3auth.connect();
-    // const id_token = await this.web3auth.authenticateUser();
-    // console.log(id_token);
     const user = await this.gaslessOnboarding.getUserInfo();
 
     this.user = user.email!;
