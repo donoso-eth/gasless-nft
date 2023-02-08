@@ -420,51 +420,6 @@ export class GaslessMintingComponent
     }
   }
 
-  /// Stripe with signed request
-  async goStripeAA() {
-    let signnedRequest = await this.getMetadata();
-    if (signnedRequest == false) {
-      return;
-    }
-
-
-    console.log(signnedRequest);
-    return;
-
-    let intentResult = await firstValueFrom(
-      this.shared.paymentStripeAAIntent(signnedRequest)
-    );
-
-      console.log(intentResult)
-    let clientSecret = intentResult.clientSecret;
-
-    this.store.dispatch(
-      Web3Actions.chainBusyWithMessage({
-        message: {
-          header: `Waiting for confirmation`,
-          body: `Payment and minting process created <br> your NFT will be: <br> <br> <div style="margin:20px">
-            <img width=100 height=100 *ngIf="randGif!= 0" style="object-fit: cover;height:100px;width:100px;" src="assets/images/${this.randGif}.gif" />
-          </div>`,
-        },
-      })
-    );
-
-    const result = await this.stripe.handleCardPayment(
-      clientSecret,
-      this.card,
-      {
-        payment_method_data: {
-          billing_details: { name: 'name lastname' },
-        },
-      }
-    );
-
-    if (result.error) {
-      this.store.dispatch(Web3Actions.chainBusy({ status: false }));
-      alert('Something went wrong sorr');
-      console.log(result.error);
-    }
-  }
 
   /// Stripe with signed request
   async goStripe() {
@@ -583,7 +538,11 @@ export class GaslessMintingComponent
   }
 
   async signOut() {
-    await this.web3auth.logout();
+    await this.gaslessOnboarding.logout();
     this.provider = null;
+    this.eoa = '';
+    this.gelatoWalletAddress = '';
+    this.user = '';
+
   }
 }
