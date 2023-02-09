@@ -27,6 +27,20 @@
       "destination": "/index.html"
     }
   ]
+},{
+  "target":"snap",
+  "public": "dist/gasless-nft",
+  "ignore": [
+    "firebase.json",
+    "**/.*",
+    "**/node_modules/**"
+  ],
+  "rewrites": [
+    {
+      "source": "**",
+      "destination": "/index.html"
+    }
+  ]
 }
 ]
 }

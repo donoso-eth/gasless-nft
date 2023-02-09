@@ -34,16 +34,16 @@
               You don't need Eth.... only 50 us$ -->
           </p>
 
-          <button *ngIf="provider == null && installedSnap!= undefined" pButton pRipple style="margin: 10px auto" type="button" label="Sign In"
+          <!-- <button *ngIf="provider == null && installedSnap!= undefined" pButton pRipple style="margin: 10px auto" type="button" label="Sign In"
           (click)="connect()"></button>
           <div *ngIf="provider!= null && installedSnap== undefined">
             <span style="display:block;padding:10px;" *ngIf="user!= undefined">Logged in with <span style="overflow-wrap: break-word;color:var(--primary-color)">{{user}}</span></span><br>
             <span style="display:block;padding:10px;" >EOA: <span style="overflow-wrap: break-word;color:var(--primary-color)">{{eoa}}</span></span><br>
             <span style="display:block;padding:10px;" >Smart Wallet: <span style="overflow-wrap: break-word;color:var(--primary-color)">{{gelatoWalletAddress}}</span></span><br>
-          </div>
+          </div> -->
 
-          <button *ngIf="provider !== null && installedSnap== undefined" pButton pRipple style="margin: 10px auto" type="button" label="Sign Out"
-          (click)="signOut()"></button>
+          <!-- <button *ngIf="provider !== null && installedSnap== undefined" pButton pRipple style="margin: 10px auto" type="button" label="Sign Out"
+          (click)="signOut()"></button> -->
       
           <div style="margin-top:30px">
             <img height="50" src="assets/images/gelato.svg" />
@@ -65,7 +65,7 @@
           </div>
         </div>
 
-        <div style="border: 1px solid #f5c3a6;
+        <div *ngIf="false" style="border: 1px solid #f5c3a6;
         padding: 10px;
         border-radius: 7px;
         margin: 20px auto 5px;
@@ -76,7 +76,7 @@
           (click)="aaMint()"></button>
         </div>
 
-        <div style="border: 1px solid #f5c3a6;
+        <div *ngIf="false" style="border: 1px solid #f5c3a6;
         padding: 10px;
         border-radius: 7px;
         margin: 20px auto 5px;

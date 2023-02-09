@@ -7,6 +7,9 @@
         ],
         "auth": [
           "gelato-gasless-nft-web3auth"
+        ],
+        "snap": [
+          "gelato-gasless-nft-snap"
         ]
       }
     }

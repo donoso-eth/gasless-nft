@@ -439,19 +439,7 @@ export class GaslessMintingComponent
     }
   }
 
-  private loadScript() {
-    // this.stripeLoaded = false;
-    const script = this.document.createElement('script');
-    script.type = 'text/javascript';
-    script.async = true;
-    script.crossorigin = true;
-    script.src = 'https://js.stripe.com/v3/';
-    script.onload = () => {
-      this.init();
-    };
 
-    this.document.body.appendChild(script);
-  }
   override async hookContractConnected(): Promise<void> {
     let signer = this.dapp.signer!;
   }
@@ -497,10 +485,10 @@ export class GaslessMintingComponent
       },
     };
 
-    // Create an instance of the card Element.
-    this.card = this.elements.create('card', { style: style });
-    this.card.mount('#card-element');
-    this.store.dispatch(Web3Actions.chainBusy({ status: false }));
+    // // Create an instance of the card Element.
+    // this.card = this.elements.create('card', { style: style });
+    // this.card.mount('#card-element');
+    // this.store.dispatch(Web3Actions.chainBusy({ status: false }));
   }
 
   async signOut() {
@@ -522,7 +510,7 @@ export class GaslessMintingComponent
       this.reconnect();
           }
 
-    this.loadScript();
+   // this.loadScript();
     this.initializeSnap();
   }
 
@@ -552,7 +540,7 @@ async isFlaskAvailable() {
     this.show_success = true;
   });
   await this.getTokenId();
-  await this.getTokenId()
+
   try {
     const clientVersion = await ethereum?.request({
       method: 'web3_clientVersion',
@@ -560,9 +548,13 @@ async isFlaskAvailable() {
 
     const isFlaskDetected = (clientVersion as string[])?.includes('flask');
     this.isFlask = Boolean(ethereum && isFlaskDetected);
+    this.store.dispatch(Web3Actions.chainBusy({ status: false }));
+
   
   } catch {
     this.isFlask = false
+    this.store.dispatch(Web3Actions.chainBusy({ status: false }));
+
   }
 }
 
@@ -592,7 +584,7 @@ getSnaps = async (): Promise<GetSnapsResponse> => {
 };
 
  connectSnap = async (
-  snapId: string = defaultSnapOrigin,
+  snapId: string = "npm:gelato-snap@0.1.0",//defaultSnapOrigin,
   params: Record<'version' | string, unknown> = {},
 ) => {
   let ethereum = (window as any).ethereum;
