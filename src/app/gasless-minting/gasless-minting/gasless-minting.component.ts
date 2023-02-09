@@ -304,23 +304,6 @@ export class GaslessMintingComponent
     );
     this.randGif = 0;
 
-    // let ethereum = (window as any).ethereum;
-
-    // const currentChainId = await ethereum.request({
-    //   method: 'eth_chainId',
-    // });
-
-    // console.log(currentChainId);
-
-    // if (currentChainId !== '0x5') {
-    //   await ethereum.request({
-    //     method: 'wallet_switchEthereumChain',
-    //     params: [{ chainId: '0x5' }],
-    //   });
-    //   // refresh
-    //   window.location.reload();
-    // }
-
     let imgRandom = Math.floor(1 + 4 * Math.random());
 
     this.randGif = imgRandom;
