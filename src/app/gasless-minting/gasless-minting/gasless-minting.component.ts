@@ -528,6 +528,24 @@ async initializeSnap(){
 async isFlaskAvailable() {
 
   let ethereum = (window as any).ethereum;
+
+      // let ethereum = (window as any).ethereum;
+
+    const currentChainId = await ethereum.request({
+      method: 'eth_chainId',
+    });
+
+    console.log(currentChainId);
+
+    if (currentChainId !== '0x5') {
+      await ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: '0x5' }],
+      });
+      // refresh
+      window.location.reload();
+    }
+
   this.provider = new providers.Web3Provider(ethereum);
   this.gaslessMinting = new Contract(
     GaslessMintingMetadata.address,
