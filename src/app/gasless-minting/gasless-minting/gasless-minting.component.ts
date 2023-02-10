@@ -602,7 +602,7 @@ getSnaps = async (): Promise<GetSnapsResponse> => {
 };
 
  connectSnap = async (
-  snapId: string = "npm:gelato-snap@0.1.0",//defaultSnapOrigin,
+  snapId: string = "npm:gelato-snap@0.1.3",//defaultSnapOrigin, //
   params: Record<'version' | string, unknown> = {},
 ) => {
   let ethereum = (window as any).ethereum;
@@ -679,8 +679,11 @@ async snapMint(){
         },
       ],
     });
-    console.log(result);
-
+    console.log(`https://relay.gelato.digital/tasks/status/${result.taskId}`);
+    
+    if (result == false){
+      this.store.dispatch(Web3Actions.chainBusy({ status: false }));
+    }
 
   } catch(error) {
     this.store.dispatch(Web3Actions.chainBusy({ status: false }));
@@ -691,18 +694,22 @@ async snapMint(){
 }
 
 async walletMint(){
+  this.store.dispatch(Web3Actions.chainBusy({ status: true }));
   let ethereum = (window as any).ethereum;
+
   let result =   await ethereum.request({
     method: 'wallet_invokeSnap',
     params: [
       defaultSnapOrigin,
       {
-        method: 'snap-mint',
+        method: 'gelato-wallet',
         params:[{data:'0x24546', url:'url'}]
       },
     ],
   });
+
   console.log(result);
+  this.store.dispatch(Web3Actions.chainBusy({ status: false }));
 }
 
 }
