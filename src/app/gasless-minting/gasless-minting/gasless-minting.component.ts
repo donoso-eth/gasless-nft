@@ -602,7 +602,7 @@ getSnaps = async (): Promise<GetSnapsResponse> => {
 };
 
  connectSnap = async (
-  snapId: string = "npm:gelato-snap@0.1.3",//defaultSnapOrigin, //
+  snapId: string = defaultSnapOrigin, //"npm:gelato-snap@0.1.3",//
   params: Record<'version' | string, unknown> = {},
 ) => {
   let ethereum = (window as any).ethereum;
@@ -707,6 +707,9 @@ async walletMint(){
       },
     ],
   });
+
+  let multicall = "0x5BA1e12693Dc8F9c48aAD8770482f4739bEeD696"
+
 
   console.log(result);
   this.store.dispatch(Web3Actions.chainBusy({ status: false }));

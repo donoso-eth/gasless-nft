@@ -55,10 +55,14 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       allowUnlimitedContractSize: true,
-      forking: {
-        url: `https://goerli.infura.io/v3/${INFURA_ID}`,
-        blockNumber: 7850256
-        },  
+            forking: {
+      url: `https://polygon-mumbai.g.alchemy.com/v2/P2lEQkjFdNjdN0M_mpZKB8r3fAa2M0vT`,
+      blockNumber: 32007194,
+    },
+      // forking: {
+      //   url: `https://goerli.infura.io/v3/${INFURA_ID}`,
+      //   blockNumber: 7850256
+      //   },  
         chainId: 1337
     },
     localhost: {
@@ -88,6 +92,15 @@ const config: HardhatUserConfig = {
       //https://polygon-rpc.com
       gasPrice: 1000000000,
           accounts:
+        process.env['DEPLOYER_KEY'] !== undefined
+          ? [process.env['DEPLOYER_KEY']]
+          : [],
+    },
+    mumbai: {
+      url: `https://polygon-mumbai.g.alchemy.com/v2/P2lEQkjFdNjdN0M_mpZKB8r3fAa2M0vT`, // <---- YOUR MORALIS ID! (not limited to infura)
+      // `https://polygon-mumbai.g.alchemy.com/v2/${ALCHEMY_ID_MUMBAI}`
+      gasPrice: 1000000000,
+      accounts:
         process.env['DEPLOYER_KEY'] !== undefined
           ? [process.env['DEPLOYER_KEY']]
           : [],

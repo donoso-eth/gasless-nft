@@ -1,1 +1,14 @@
-{"gaslessMinting":{"artifactsPath":"GaslessMinting.sol/GaslessMinting.json","name":"GaslessMinting","ctor":[],"jsonName":"gasless-minting"}}
+{
+  "gaslessMinting": {
+    "artifactsPath": "GaslessMinting.sol/GaslessMinting.json",
+    "name": "GaslessMinting",
+    "ctor": [],
+    "jsonName": "gasless-minting"
+  },
+  "gasslessWalletFaucet": {
+    "name": "GasslessWalletFaucet",
+    "artifactsPath": "Faucet.sol/GasslessWalletFaucet.json",
+    "jsonName": "gassless_wallet_faucet",
+    "ctor": []
+  }
+}
